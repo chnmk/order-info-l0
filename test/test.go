@@ -11,6 +11,9 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
+// TEMP
+var E models.Order
+
 func PublishTestData() {
 	topic := "orders"
 	partition := 0
@@ -20,13 +23,13 @@ func PublishTestData() {
 		log.Fatal("failed to dial leader:", err)
 	}
 
-	var E models.Order
+	var order models.Order
 	content, err := os.ReadFile("test/model.json")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = json.Unmarshal(content, &E)
+	err = json.Unmarshal(content, &order)
 	if err != nil {
 		log.Fatal(err)
 	}
