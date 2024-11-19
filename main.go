@@ -6,14 +6,30 @@ import (
 	"log"
 	"time"
 
+	"github.com/chnmk/order-info-l0/test"
 	"github.com/segmentio/kafka-go"
 )
+
+func init() {
+	test.PublishTestData()
+}
 
 func main() {
 	topic := "orders"
 	partition := 0
 
-	conn, err := kafka.DialLeader(context.Background(), "tcp", "kafka:9092", topic, partition)
+	var conn *kafka.Conn
+	var err error
+
+	for retry := 0; retry < 10; retry++ {
+		conn, err = kafka.DialLeader(context.Background(), "tcp", "kafka:9092", topic, partition)
+		if err == nil {
+			break
+		}
+
+		time.Sleep(10 * time.Second)
+	}
+
 	if err != nil {
 		log.Fatal("failed to dial leader:", err)
 	}
