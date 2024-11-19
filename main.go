@@ -6,11 +6,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/chnmk/order-info-l0/internal/broker"
 	"github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/models"
-	"github.com/chnmk/order-info-l0/test"
 )
 
 func init() {
@@ -27,22 +25,24 @@ func init() {
 		log.Fatal(err)
 	}
 
-	os.Exit(0)
+	// time.Sleep(25 * time.Second)
 
 	// ===================
 
 	config.SetDefaultEnv()
 	config.GetEnv()
 	if config.EnvVariables["PUBLISH_TEST_DATA"] == "1" {
-		test.PublishTestData()
+		// test.PublishTestData()
 	}
 }
 
 func main() {
-	broker.Consume()
+	// broker.Consume()
 
-	db_conn := database.Connect()
-	defer db_conn.Close(context.Background())
+	database.DB = database.Connect()
+	defer database.DB.Close(context.Background())
 
-	database.Ping(db_conn)
+	database.Ping(database.DB)
+	database.CreateTables(database.DB)
+
 }

@@ -9,6 +9,8 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+var DB *pgx.Conn
+
 func Connect() *pgx.Conn {
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
 		config.EnvVariables["DB_USER"],
