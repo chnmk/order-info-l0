@@ -2,8 +2,8 @@ services:
   orders:
     build: .
     command: go run main.go
-    depends_on:
-      - kafka
+    env_file:
+      - .env
     networks:
       - kafka-network
     volumes:
