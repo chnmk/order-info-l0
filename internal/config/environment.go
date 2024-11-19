@@ -12,6 +12,9 @@ var EnvVariables map[string]string
 func SetDefaultEnv() {
 	EnvVariables = make(map[string]string)
 	EnvVariables["PUBLISH_TEST_DATA"] = "0"
+	EnvVariables["DB_NAME"] = "orders"
+	EnvVariables["DB_USER"] = "user"
+	EnvVariables["DB_PASSWORD"] = "12345"
 }
 
 func GetEnv() {

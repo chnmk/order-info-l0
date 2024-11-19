@@ -6,15 +6,16 @@ services:
       - .env
     networks:
       - kafka-network
+      - postgres-network
     volumes:
       - .:/orders
 
   kafka: 
+    # https://hub.docker.com/r/apache/kafka
     image: apache/kafka:latest
     networks:
       - kafka-network
     environment:
-      # https://hub.docker.com/r/apache/kafka
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
@@ -23,6 +24,23 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
 
+  postgres:
+    # https://www.docker.com/blog/how-to-use-the-postgres-docker-official-image/
+    image: postgres:alpine
+    networks:
+      - postgres-network
+    volumes:
+      - pgdata:/var/lib/postgresql/data 
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+
 networks:
   kafka-network:
     driver: bridge
+  postgres-network:
+    driver: bridge
+
+volumes:
+  pgdata:
