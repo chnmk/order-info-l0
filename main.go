@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/chnmk/order-info-l0/internal/config"
+	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/transport"
 	"github.com/chnmk/order-info-l0/test"
 )
@@ -35,15 +37,21 @@ func init() {
 }
 
 func main() {
-	/*
-		broker.Consume()
 
-		database.DB = database.Connect()
-		defer database.DB.Close(context.Background())
+	// broker.Consume()
 
-		database.Ping(database.DB)
-		database.CreateTables(database.DB)
-	*/
+	database.DB = database.Connect()
+	defer database.DB.Close(context.Background())
+
+	database.Ping(database.DB)
+	database.CreateTables(database.DB)
+
+	// TEMP
+	database.InsertOrder(database.DB, test.E)
+	o := database.SelectOrderById(database.DB, "b563feb7b2b84b6test")
+	log.Println(o)
+
+	// ===================
 
 	http.HandleFunc("/order", transport.GetOrder)
 	http.Handle("/", http.FileServer(http.Dir("./web")))

@@ -11,7 +11,7 @@ import (
 Строка для создания таблицы с информацией о заказах.
 
 Таблица связывается с одной записью в таблице "delivery" через поле delivery_id и одной записью в таблице "payment" через поле payment_id.
-Связывается с одной или несколькими записями в таблице items через таблицу itemsbind полем itemsbind_id.
+Связывается с одной или несколькими записями в таблице items через таблицу itemsbind полем order_uid.
 */
 var createOrders = `CREATE TABLE IF NOT EXISTS orders (
 	order_uid VARCHAR(255),
@@ -19,7 +19,6 @@ var createOrders = `CREATE TABLE IF NOT EXISTS orders (
 	entry VARCHAR(255),
 	delivery_id INTEGER,
 	payment_id INTEGER,
-	itemsbind_id INTEGER,
 	locale VARCHAR(255),
 	internal_signature VARCHAR(255),
 	customer_id VARCHAR(255),
@@ -27,7 +26,7 @@ var createOrders = `CREATE TABLE IF NOT EXISTS orders (
 	shardkey VARCHAR(255),
 	sm_id INTEGER,
 	date_created VARCHAR(255),
-    "oof_shard" VARCHAR(255)
+    oof_shard VARCHAR(255)
 	)`
 
 /*

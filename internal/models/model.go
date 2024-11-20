@@ -4,9 +4,9 @@ type Order struct {
 	Order_uid          string   `json:"order_uid"`
 	Track_number       string   `json:"track_number"`
 	Entry              string   `json:"entry"`
-	Delivery           delivery `json:"delivery"`
-	Payment            payment  `json:"payment"`
-	Items              []item   `json:"items"`
+	Delivery           Delivery `json:"delivery"`
+	Payment            Payment  `json:"payment"`
+	Items              []Item   `json:"items"`
 	Locale             string   `json:"locale"`
 	Internal_signature string   `json:"internal_signature"`
 	Customer_id        string   `json:"customer_id"`
@@ -17,7 +17,7 @@ type Order struct {
 	Oof_shard          string   `json:"oof_shard"`
 }
 
-type delivery struct {
+type Delivery struct {
 	Name    string `json:"name"`
 	Phone   string `json:"phone"`
 	Zip     string `json:"zip"`
@@ -27,7 +27,7 @@ type delivery struct {
 	Email   string `json:"email"`
 }
 
-type payment struct {
+type Payment struct {
 	Transaction   string `json:"transaction"`
 	Request_id    string `json:"request_id"`
 	Currency      string `json:"currency"`
@@ -40,7 +40,7 @@ type payment struct {
 	Custom_fee    int32  `json:"custom_fee"`
 }
 
-type item struct {
+type Item struct {
 	Chrt_id      int32  `json:"chrt_id"`
 	Track_number string `json:"track_number"`
 	Price        int32  `json:"price"`
