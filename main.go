@@ -50,6 +50,9 @@ func main() {
 	database.InsertOrder(database.DB, test.E)
 	o := database.SelectOrderById(database.DB, "b563feb7b2b84b6test")
 	log.Println(o)
+	log.Println("==================")
+	restored := database.RestoreData(database.DB)
+	log.Println(restored)
 
 	// ===================
 

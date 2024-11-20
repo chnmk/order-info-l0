@@ -14,7 +14,7 @@ import (
 Связывается с одной или несколькими записями в таблице items через таблицу itemsbind полем order_uid.
 */
 var createOrders = `CREATE TABLE IF NOT EXISTS orders (
-	order_uid VARCHAR(255),
+	order_uid VARCHAR(255) NOT NULL UNIQUE,
 	track_number VARCHAR(255),
 	entry VARCHAR(255),
 	delivery_id INTEGER,
@@ -95,7 +95,11 @@ var createItemsbind = `CREATE TABLE IF NOT EXISTS itemsbind (
 	item_id INTEGER
 	)`
 
-// Создаёт таблицы в базе данных DB. В случае ошибки вызывает log.Fatal().
+/*
+Создаёт отсутствующие таблицы в базе данных.
+В случае ошибки вызывает log.Fatal().
+Не использует индексы из-за потенциально большого количества операций записи.
+*/
 func CreateTables(db *pgx.Conn) {
 	queries := []string{createOrders, createDelivery, createPayments, createItems, createItemsbind}
 
