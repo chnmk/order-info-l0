@@ -1,7 +1,7 @@
 package config
 
 import (
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -20,18 +20,19 @@ func SetDefaultEnv() {
 func GetEnv() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Print("Warning: .env file not found")
+		slog.Info("Warning: .env file not found")
 	}
 
-	log.Print("Reading environment variables...")
+	slog.Info("Reading environment variables...")
 
 	for name, def := range EnvVariables {
-		variable, exists := os.LookupEnv(name)
+		value, exists := os.LookupEnv(name)
 		if exists {
-			log.Printf("%s: %s", name, variable)
-			EnvVariables[name] = variable
+			// TODO: переписать эти ошибки
+			slog.Info(name + ": " + value)
+			EnvVariables[name] = value
 		} else {
-			log.Printf("%s not found, using default (%s)", name, def)
+			slog.Info(name + " not found, using default (" + def + ")")
 		}
 	}
 }

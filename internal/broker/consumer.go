@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"time"
 
 	"github.com/segmentio/kafka-go"
@@ -31,7 +32,7 @@ func Consume() {
 
 	conn.SetReadDeadline(time.Now().Add(10 * time.Second))
 
-	log.Println("reading orders...")
+	slog.Info("reading orders...")
 	batch := conn.ReadBatch(1, 1e6) // fetch 1B min, 1MB max
 
 	b := make([]byte, 10e3) // 10KB max per message

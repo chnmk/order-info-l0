@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log"
+	"log/slog"
 
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/jackc/pgx/v5"
@@ -133,5 +134,5 @@ func InsertOrder(db *pgx.Conn, order models.Order) {
 		}
 	}
 
-	log.Println("InsertOrder: success")
+	slog.Info("InsertOrder: success")
 }

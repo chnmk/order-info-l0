@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log"
+	"log/slog"
 
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/jackc/pgx/v5"
@@ -180,6 +181,6 @@ func SelectOrderById(db *pgx.Conn, order_uid string) models.Order {
 
 	order.Items = items
 
-	log.Println("SelectOrderById: success")
+	slog.Info("SelectOrderById: success")
 	return order
 }

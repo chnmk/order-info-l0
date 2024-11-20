@@ -14,6 +14,20 @@ import (
 // TEMP
 var E models.Order
 
+// TEMP
+func ReadModelFile() {
+	content, err := os.ReadFile("test/model.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = json.Unmarshal(content, &E)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
 func PublishTestData() {
 	topic := "orders"
 	partition := 0

@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
+	"github.com/chnmk/order-info-l0/internal/broker"
 	"github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/memory"
@@ -16,49 +16,48 @@ import (
 )
 
 func init() {
-	// TEMP
-	content, err := os.ReadFile("test/model.json")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// Используется slog, поскольку он относится к стандартной библиотеке и обеспечивает простой вывод в формате JSON.
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+	slog.Info("initialization start...")
 
-	err = json.Unmarshal(content, &test.E)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// TODO: Удали меня, и из пакета test тоже.
+	test.ReadModelFile()
 
-	// ===================
-
+	// Переменные окружения.
 	config.SetDefaultEnv()
 	config.GetEnv()
-	/*
-		if config.EnvVariables["PUBLISH_TEST_DATA"] == "1" {
-			test.PublishTestData()
-		}
-	*/
+
+	// Публикация пробных данных в Kafka (TODO: сгенерировать нормальные данные).
+	if config.EnvVariables["PUBLISH_TEST_DATA"] == "1" {
+		test.PublishTestData()
+	}
+
+	slog.Info("initialization complete")
 }
 
 func main() {
+	// Подключение к БД (TODO: использовать connection pool), пингуем (?) и создаем таблицы.
 	database.DB = database.Connect()
 	defer database.DB.Close(context.Background())
 
-	database.Ping(database.DB)
+	// database.Ping(database.DB)
 	database.CreateTables(database.DB)
 
+	// Восстановление данных из БД в память (TODO: пошаманить с memory).
 	memory.DATA = database.RestoreData(database.DB)
 
-	// TEMP
+	// TODO: удали меня.
 	if len(memory.DATA) == 0 {
 		database.InsertOrder(database.DB, test.E)
 	}
 
-	// ===================
+	// Подключение к Kafka (TODO: многопоточность?).
+	broker.Consume()
 
-	// broker.Consume()
-
+	// Запуск сервера (TODO: обновить хендлеры).
 	http.HandleFunc("/order", transport.GetOrder)
 	http.HandleFunc("/", web.DisplayTemplate)
-	// http.Handle("/", http.FileServer(http.Dir("./web")))
 
 	err := http.ListenAndServe(":3000", nil)
 	if err != nil {
