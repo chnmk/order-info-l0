@@ -4,8 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orders</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: Arial, sans-serif;
+        }
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            height: 100vh;
+            width: 100vw;
+            background: linear-gradient(#e664db, #c291e5);
+        }
+    </style>
 </head>
 <body>
-    Hello, World!
+    <div class="wrapper">
+        <h1>Просмотр заказа</h1>
+        <div>
+           Введите id
+        </div>
+        <div>
+            Пример: b563feb7b2b84b6test
+        </div>
+        <div>
+            <!--
+            <input type="text" />
+            <button>go</button>
+            -->
+        </div>
+
+        <div>
+            <div>
+                Номер заказа: b563feb7b2b84b6test
+            </div>
+            <div>
+                Цена: 317
+            </div>
+            <div>
+                Заказчик: Test Testov
+            </div>
+            <div>
+                Адрес: Kiryat Mozkin, Ploshad Mira 15
+            </div>
+            <div>
+                Номер телефона: +9720000000
+            </div>
+            <div>
+                Заказ:
+                <table>
+                    <tr>
+                        <th>Номер</th>
+                        <th>Наименование</th>
+                        <th>Цена</th>
+                      </tr>
+                      <tr>
+                        <td>9934930</td>
+                        <td>Mascaras</td>
+                        <td>317</td>
+                      </tr>
+                </table>
+            </div>
+            <div>
+                Данные целиком:
+            </div>
+        </div>
+    </div>
 </body>
 </html>
