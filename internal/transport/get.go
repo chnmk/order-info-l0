@@ -4,23 +4,29 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/chnmk/order-info-l0/test"
+	"github.com/chnmk/order-info-l0/internal/database"
 )
 
 func GetOrder(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte("invalid method"))
 		return
 	}
 
-	/*
-		id := r.FormValue("order_uid")
-		if id == "" {
-			return
-		}
-	*/
+	id := r.FormValue("id")
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("expected id"))
+		return
+	}
 
-	resp, err := json.Marshal(test.E)
+	result := database.SelectOrderById(database.DB, id)
+
+	resp, err := json.Marshal(result)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("error"))
 		return
 	}
 

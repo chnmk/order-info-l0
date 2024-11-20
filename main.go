@@ -9,6 +9,7 @@ import (
 
 	"github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/database"
+	"github.com/chnmk/order-info-l0/internal/memory"
 	"github.com/chnmk/order-info-l0/internal/transport"
 	"github.com/chnmk/order-info-l0/test"
 )
@@ -37,24 +38,22 @@ func init() {
 }
 
 func main() {
-
-	// broker.Consume()
-
 	database.DB = database.Connect()
 	defer database.DB.Close(context.Background())
 
 	database.Ping(database.DB)
 	database.CreateTables(database.DB)
 
+	memory.DATA = database.RestoreData(database.DB)
+
 	// TEMP
-	database.InsertOrder(database.DB, test.E)
-	o := database.SelectOrderById(database.DB, "b563feb7b2b84b6test")
-	log.Println(o)
-	log.Println("==================")
-	restored := database.RestoreData(database.DB)
-	log.Println(restored)
+	if len(memory.DATA) == 0 {
+		database.InsertOrder(database.DB, test.E)
+	}
 
 	// ===================
+
+	// broker.Consume()
 
 	http.HandleFunc("/order", transport.GetOrder)
 	http.Handle("/", http.FileServer(http.Dir("./web")))
