@@ -7,14 +7,15 @@ import (
 	"os"
 	"time"
 
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/segmentio/kafka-go"
 )
 
-// TEMP
+// Удали меня
 var E models.Order
 
-// TEMP
+// Удали меня
 func ReadModelFile() {
 	content, err := os.ReadFile("test/model.json")
 	if err != nil {
@@ -26,6 +27,25 @@ func ReadModelFile() {
 		log.Fatal(err)
 	}
 
+}
+
+func GenerateFakeData() []kafka.Message {
+	var result []kafka.Message
+
+	for i := 0; i < 1000; i++ {
+		// В модель надо добавить теги вида `fake:"{number:1,100}"`
+		// https://github.com/brianvoe/gofakeit
+		var order models.Order
+		gofakeit.Struct(&order)
+
+		// Посмотреть как она будет вести себя с []Item
+
+		// Использовать marshall (?)
+
+		// result = append(result, kafka.Message{Value: order})
+	}
+
+	return result
 }
 
 func PublishTestData() {
@@ -48,6 +68,7 @@ func PublishTestData() {
 		log.Fatal(err)
 	}
 
+	// Записывает некорректные данные
 	conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 	_, err = conn.WriteMessages(
 		kafka.Message{Value: []byte("Date: " + time.Now().String())},
@@ -64,4 +85,18 @@ func PublishTestData() {
 	if err := conn.Close(); err != nil {
 		log.Fatal("failed to close writer:", err)
 	}
+
+	// Записывает моковые данные
+	conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+	_, err = conn.WriteMessages(
+		GenerateFakeData()...,
+	)
+	if err != nil {
+		log.Fatal("failed to write messages:", err)
+	}
+
+	if err := conn.Close(); err != nil {
+		log.Fatal("failed to close writer:", err)
+	}
+
 }

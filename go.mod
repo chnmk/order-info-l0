@@ -3,6 +3,7 @@ module github.com/chnmk/order-info-l0
 go 1.22.4
 
 require (
+	github.com/brianvoe/gofakeit/v7 v7.1.2
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/joho/godotenv v1.5.1
 	github.com/segmentio/kafka-go v0.4.47

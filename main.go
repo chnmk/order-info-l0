@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/chnmk/order-info-l0/internal/broker"
 	"github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/database"
@@ -20,6 +21,9 @@ func init() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 	slog.Info("initialization start...")
+
+	// TODO: Удали меня.
+	slog.Info(gofakeit.Emoji())
 
 	// TODO: Удали меня, и из пакета test тоже.
 	test.ReadModelFile()
