@@ -29,13 +29,23 @@ func ReadModelFile() {
 
 }
 
+// Данные не претендуют на реалистичность, совпадение цен и так далее, поскольку по ТЗ мы пока ничего не делаем с этими данными, важно только то, что они есть.
 func GenerateFakeData() []kafka.Message {
+
 	var result []kafka.Message
 
 	for i := 0; i < 1000; i++ {
 		// В модель надо добавить теги вида `fake:"{number:1,100}"`
 		// https://github.com/brianvoe/gofakeit
 		var order models.Order
+
+		// Желательно написать функцию для возвращения СТРОКИ в таком формате: 2021-11-26T06:22:19Z
+		/*
+			func (c *order.date_created) Fake(f *gofakeit.Faker) (any, error) {
+				return f.DateRange(time.Now().AddDate(-100, 0, 0), time.Now().AddDate(-18, 0, 0)), nil
+			}
+		*/
+
 		gofakeit.Struct(&order)
 
 		// Посмотреть как она будет вести себя с []Item
