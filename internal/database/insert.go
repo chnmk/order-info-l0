@@ -46,6 +46,8 @@ var q_insert_itemsbind = `
 `
 
 func InsertOrder(db *pgx.Conn, order models.Order) {
+	slog.Info("adding order to database...")
+
 	row := db.QueryRow(context.Background(), q_insert_delivery,
 		order.Delivery.Name,
 		order.Delivery.Phone,
@@ -134,5 +136,5 @@ func InsertOrder(db *pgx.Conn, order models.Order) {
 		}
 	}
 
-	slog.Info("InsertOrder: success")
+	slog.Info("order successfully added to database")
 }

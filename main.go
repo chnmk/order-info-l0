@@ -48,7 +48,7 @@ func main() {
 	go broker.Consume()
 
 	// Запуск сервера (TODO: обновить хендлеры).
-	http.HandleFunc("/order", transport.GetOrder)
+	http.HandleFunc("/orders", transport.GetOrder)
 	http.HandleFunc("/", web.DisplayTemplate)
 
 	err := http.ListenAndServe(":3000", nil)

@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/segmentio/kafka-go"
 )
@@ -59,7 +60,7 @@ func Consume() {
 				slog.Info("failed to validate, skipping")
 			} else {
 				fmt.Println(order)
-				// database.InsertOrder(database.DB, order)
+				database.InsertOrder(database.DB, order)
 			}
 		}
 	}
