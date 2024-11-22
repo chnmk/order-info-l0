@@ -22,7 +22,7 @@ type Delivery struct {
 	Phone   string `json:"phone" fake:"{phone}"`
 	Zip     string `json:"zip" fake:"{zip}"`
 	City    string `json:"city" fake:"{city}"`
-	Address string `json:"address" fake:"{address}"`
+	Address string `json:"address" fake:"{streetname}"`
 	Region  string `json:"region" fake:"{state}"`
 	Email   string `json:"email" fake:"{email}"`
 }

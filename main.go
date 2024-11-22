@@ -25,7 +25,7 @@ func init() {
 	config.SetDefaultEnv()
 	config.GetEnv()
 
-	// Публикация пробных данных в Kafka (TODO: сгенерировать нормальные данные).
+	// Публикация пробных данных в Kafka (TODO: генерировать постоянно).
 	if config.EnvVariables["PUBLISH_TEST_DATA"] == "1" {
 		test.PublishTestData()
 	}

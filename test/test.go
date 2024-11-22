@@ -14,6 +14,7 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
+// Читает файл model.json, возвращает его в виде структуры и []byte.
 func ReadModelFile() (models.Order, []byte) {
 	var E models.Order
 	content, err := os.ReadFile("test/model.json")
@@ -65,6 +66,7 @@ func GenerateFakeData() []kafka.Message {
 		msg, err := json.Marshal(order)
 		if err != nil {
 			slog.Error(err.Error())
+			return result
 		}
 
 		result = append(result, kafka.Message{Value: msg})
@@ -86,19 +88,20 @@ func PublishTestData() {
 		log.Fatal("failed to dial leader:", err)
 	}
 
-	_, content := ReadModelFile()
+	_, model := ReadModelFile()
 
 	slog.Info("writing invalid data...")
 
-	// Записывает некорректные данные
+	// Создаёт и записывает некорректные данные
 	conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 	_, err = conn.WriteMessages(
-		kafka.Message{Value: []byte("Date: " + time.Now().String())},
-		kafka.Message{Value: []byte("example")},
-		kafka.Message{Value: []byte("\"{order_uid\": \"abcd\"")},
-		kafka.Message{Value: []byte("\"{order_uid\": \"abcd\", \"example\": \"dcba\"}")},
-		kafka.Message{Value: content},
-		kafka.Message{Value: []byte("===============")},
+		kafka.Message{Value: InvalidFakeData(new(models.MockEmptyOrder))},
+		kafka.Message{Value: InvalidFakeData(new(models.MockEmptyOrderWithNumber))},
+		kafka.Message{Value: InvalidFakeData(new(models.MockNotOrder))},
+		kafka.Message{Value: InvalidFakeData(new(models.MockNotOrderWithNumber))},
+		kafka.Message{Value: InvalidFakeData(new(models.MockOrderIntIsString))},
+		kafka.Message{Value: []byte(gofakeit.Word())},
+		kafka.Message{Value: model},
 	)
 	if err != nil {
 		log.Fatal("failed to write messages:", err)
@@ -106,7 +109,6 @@ func PublishTestData() {
 
 	slog.Info("writing fake data...")
 
-	// Записывает моковые данные
 	conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 	_, err = conn.WriteMessages(
 		GenerateFakeData()...,
@@ -121,4 +123,14 @@ func PublishTestData() {
 
 	slog.Info("test data successfully published")
 
+}
+
+func InvalidFakeData(mock interface{}) []byte {
+	gofakeit.Struct(&mock)
+
+	msg, err := json.Marshal(mock)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	return msg
 }
