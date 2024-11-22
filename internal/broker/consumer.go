@@ -35,7 +35,7 @@ func Consume() {
 	slog.Info("reading orders...")
 	batch := conn.ReadBatch(1, 1e6) // fetch 1B min, 1MB max
 
-	b := make([]byte, 10e3) // 10KB max per message
+	b := make([]byte, 100e3) // 100KB max per message
 	for {
 		n, err := batch.Read(b)
 		if err != nil {

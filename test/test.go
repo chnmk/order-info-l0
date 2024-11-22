@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -12,11 +13,8 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-// Удали меня
-var E models.Order
-
-// Удали меня
-func ReadModelFile() {
+func ReadModelFile() (models.Order, []byte) {
+	var E models.Order
 	content, err := os.ReadFile("test/model.json")
 	if err != nil {
 		log.Fatal(err)
@@ -27,16 +25,16 @@ func ReadModelFile() {
 		log.Fatal(err)
 	}
 
+	return E, content
 }
 
 // Данные не претендуют на реалистичность, совпадение цен и так далее, поскольку по ТЗ мы пока ничего не делаем с этими данными, важно только то, что они есть.
 func GenerateFakeData() []kafka.Message {
-
 	var result []kafka.Message
 
-	for i := 0; i < 1000; i++ {
-		// В модель надо добавить теги вида `fake:"{number:1,100}"`
-		// https://github.com/brianvoe/gofakeit
+	slog.Info("generating fake data...")
+
+	for i := 0; i < 10; i++ {
 		var order models.Order
 
 		// Желательно написать функцию для возвращения СТРОКИ в таком формате: 2021-11-26T06:22:19Z
@@ -50,10 +48,15 @@ func GenerateFakeData() []kafka.Message {
 
 		// Посмотреть как она будет вести себя с []Item
 
-		// Использовать marshall (?)
+		msg, err := json.Marshal(order)
+		if err != nil {
+			slog.Error(err.Error())
+		}
 
-		// result = append(result, kafka.Message{Value: order})
+		result = append(result, kafka.Message{Value: msg})
 	}
+
+	slog.Info("fake data generation finished")
 
 	return result
 }
@@ -62,21 +65,16 @@ func PublishTestData() {
 	topic := "orders"
 	partition := 0
 
+	slog.Info("connecting to kafka to publish test data...")
+
 	conn, err := kafka.DialLeader(context.Background(), "tcp", "kafka:9092", topic, partition)
 	if err != nil {
 		log.Fatal("failed to dial leader:", err)
 	}
 
-	var order models.Order
-	content, err := os.ReadFile("test/model.json")
-	if err != nil {
-		log.Fatal(err)
-	}
+	_, content := ReadModelFile()
 
-	err = json.Unmarshal(content, &order)
-	if err != nil {
-		log.Fatal(err)
-	}
+	slog.Info("writing invalid data...")
 
 	// Записывает некорректные данные
 	conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
@@ -92,9 +90,7 @@ func PublishTestData() {
 		log.Fatal("failed to write messages:", err)
 	}
 
-	if err := conn.Close(); err != nil {
-		log.Fatal("failed to close writer:", err)
-	}
+	slog.Info("writing fake data...")
 
 	// Записывает моковые данные
 	conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
@@ -108,5 +104,7 @@ func PublishTestData() {
 	if err := conn.Close(); err != nil {
 		log.Fatal("failed to close writer:", err)
 	}
+
+	slog.Info("test data successfully published")
 
 }

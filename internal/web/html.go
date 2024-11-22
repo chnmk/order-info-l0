@@ -8,6 +8,7 @@ import (
 )
 
 func DisplayTemplate(w http.ResponseWriter, r *http.Request) {
+	data, _ := test.ReadModelFile()
 	tmpl, _ := template.ParseFiles("templates/index.html")
-	tmpl.Execute(w, test.E)
+	tmpl.Execute(w, data)
 }
