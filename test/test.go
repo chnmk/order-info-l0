@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"log/slog"
+	"math/rand"
 	"os"
 	"time"
 
@@ -28,25 +29,38 @@ func ReadModelFile() (models.Order, []byte) {
 	return E, content
 }
 
-// Данные не претендуют на реалистичность, совпадение цен и так далее, поскольку по ТЗ мы пока ничего не делаем с этими данными, важно только то, что они есть.
+/*
+Генерирует случайные корректные данные с использованием Gofakeit.
+
+Данные не претендуют на реалистичность (не совпадают цены, места и так далее), но это и не мусорные рандомные символы.
+Такой вариант приемлем, поскольку по ТЗ эти данные пока никак не обрабатываются, но отобразить их нужно.
+*/
 func GenerateFakeData() []kafka.Message {
 	var result []kafka.Message
 
 	slog.Info("generating fake data...")
 
+	// Пример кастомной функции для генерации приближенных к реальности данных.
+	gofakeit.AddFuncLookup("wbdate", gofakeit.Info{
+		Category:    "custom",
+		Description: "random date string",
+		Example:     "2021-11-26T06:22:19Z",
+		Output:      "string",
+		Generate: func(f *gofakeit.Faker, m *gofakeit.MapParams, info *gofakeit.Info) (any, error) {
+			// Отнимает один мечяц от сегодняшнего дня, переводит в формат unix.
+			min := time.Now().AddDate(0, -1, 0).Unix()
+			// Прибавляет к min случайное значение, таким образом получает дату между сегодня и месяц назад.
+			unix := min + rand.Int63n(time.Now().Unix()-min)
+
+			time := time.Unix(unix, 0).Format("2006-01-02T15:04:05Z")
+			return time, nil
+		},
+	})
+
+	// Генерируем 10 сообщений для кафки (TODO: скорее всего будем генерировать по одному, а кастомную функцию отдельно вынесем)
 	for i := 0; i < 10; i++ {
 		var order models.Order
-
-		// Желательно написать функцию для возвращения СТРОКИ в таком формате: 2021-11-26T06:22:19Z
-		/*
-			func (c *order.date_created) Fake(f *gofakeit.Faker) (any, error) {
-				return f.DateRange(time.Now().AddDate(-100, 0, 0), time.Now().AddDate(-18, 0, 0)), nil
-			}
-		*/
-
 		gofakeit.Struct(&order)
-
-		// Посмотреть как она будет вести себя с []Item
 
 		msg, err := json.Marshal(order)
 		if err != nil {
