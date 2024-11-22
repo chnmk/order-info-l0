@@ -1,6 +1,5 @@
 package models
 
-// TODO: создать интерфейс для генерации подобных структур
 type MockEmptyOrder struct {
 	Order_uid string `json:"order_uid"`
 }

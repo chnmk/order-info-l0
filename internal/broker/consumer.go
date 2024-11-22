@@ -48,14 +48,19 @@ func Consume() {
 		if err != nil {
 			break
 		}
-		// fmt.Println(string(b[:n]))
+
+		// Проверяет данные и добавляет в БД если всё нормально
 		var order models.Order
 		err = json.Unmarshal(b[:n], &order)
 		if err != nil {
 			slog.Info("failed to unmarshal, skipping")
 		} else {
-			fmt.Println(order)
-			// database.InsertOrder(database.DB, n)
+			if ok := ValidateMsg(order); !ok {
+				slog.Info("failed to validate, skipping")
+			} else {
+				fmt.Println(order)
+				// database.InsertOrder(database.DB, order)
+			}
 		}
 	}
 
@@ -69,4 +74,31 @@ func Consume() {
 
 	// TODO: чтение никогда не заканчивается. Либо через 10 минут.
 	slog.Info("finished reading orders...")
+}
+
+/*
+Проверяет что нужные поля не пустые и соответствуют нашим требованиям.
+
+Пока что нам точно нужны те данные, которые выводятся в веб-интерфейсе.
+*/
+func ValidateMsg(order models.Order) bool {
+	if order.Order_uid == "" ||
+		order.Delivery.Name == "" ||
+		order.Delivery.City == "" ||
+		order.Delivery.Address == "" ||
+		order.Delivery.Phone == "" ||
+		len(order.Items) < 1 {
+
+		return false
+	}
+
+	for _, i := range order.Items {
+		if i.Chrt_id == 0 ||
+			i.Name == "" ||
+			i.Total_price == 0 {
+			return false
+		}
+	}
+
+	return true
 }
