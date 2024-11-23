@@ -28,14 +28,19 @@ func (d *MemStore) AddOrder(value models.Order) {
 	defer d.mu.Unlock()
 
 	_, ok := d.orders[d.currentkey]
-	if !ok {
-		d.orders[d.currentkey] = value
-		slog.Info("added order to memory storage")
-	} else {
-		slog.Error("failed to add order to memory storage: key already exists")
+	if ok {
+		slog.Error("failed to add order: id already exists")
+		return
 	}
 
-	database.InsertOrder(database.DB, value, d.currentkey)
+	err := database.InsertOrder(database.DB, value, d.currentkey)
+	if err != nil {
+		slog.Error("failed to add order: order already exists")
+		return
+	}
+
+	d.orders[d.currentkey] = value
+	slog.Info("added order to memory storage")
 	d.currentkey++
 }
 
@@ -58,7 +63,7 @@ func (d *MemStore) RestoreData(db *pgx.Conn) {
 		d.orders[key] = order
 	}
 
-	d.currentkey = slices.Max(ids)
+	d.currentkey = slices.Max(ids) + 1
 
 	slog.Info("data successfully restored")
 }

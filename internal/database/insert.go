@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log/slog"
+	"strings"
 
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/jackc/pgx/v5"
@@ -44,7 +45,8 @@ var q_insert_itemsbind = `
 	RETURNING id
 `
 
-func InsertOrder(db *pgx.Conn, order models.Order, key int) {
+// Пробует добавить заказ в БД, возвращает ошибку только в случае если заказ с таким order_uid уже существует.
+func InsertOrder(db *pgx.Conn, order models.Order, key int) error {
 	slog.Info("adding order to database...")
 
 	row := db.QueryRow(context.Background(), q_insert_delivery,
@@ -61,7 +63,7 @@ func InsertOrder(db *pgx.Conn, order models.Order, key int) {
 	err := row.Scan(&delivery_id)
 	if err != nil {
 		slog.Error("Failed to insert data: " + err.Error())
-		return
+		return nil
 	}
 
 	row = db.QueryRow(context.Background(), q_insert_payment,
@@ -81,7 +83,7 @@ func InsertOrder(db *pgx.Conn, order models.Order, key int) {
 	err = row.Scan(&payment_id)
 	if err != nil {
 		slog.Error("Failed to insert data: " + err.Error())
-		return
+		return nil
 	}
 
 	row = db.QueryRow(context.Background(), q_insert_order,
@@ -105,8 +107,11 @@ func InsertOrder(db *pgx.Conn, order models.Order, key int) {
 	var order_id int
 	err = row.Scan(&order_id)
 	if err != nil {
-		slog.Error("Failed to insert data: " + err.Error())
-		return
+		if strings.Contains(err.Error(), "(SQLSTATE 23505)") {
+			return err
+		} else {
+			slog.Error("Failed to insert data: " + err.Error())
+		}
 	}
 
 	for _, i := range order.Items {
@@ -128,6 +133,7 @@ func InsertOrder(db *pgx.Conn, order models.Order, key int) {
 		err = row.Scan(&item_id)
 		if err != nil {
 			slog.Error("Failed to insert data: " + err.Error())
+			return nil
 		}
 
 		row = db.QueryRow(context.Background(), q_insert_itemsbind, order_id, item_id)
@@ -136,8 +142,10 @@ func InsertOrder(db *pgx.Conn, order models.Order, key int) {
 		err = row.Scan(&bind_id)
 		if err != nil {
 			slog.Error("Failed to insert data: " + err.Error())
+			return nil
 		}
 	}
 
-	slog.Info("order successfully added to database")
+	slog.Info("added order to database")
+	return nil
 }
