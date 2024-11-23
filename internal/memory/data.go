@@ -27,6 +27,8 @@ func (d *MemStore) AddOrder(value models.Order) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
+	slog.Info("adding order to memory storage...")
+
 	_, ok := d.orders[d.currentkey]
 	if ok {
 		slog.Error("failed to add order: id already exists")

@@ -18,13 +18,14 @@ import (
 // Данные не претендуют на реалистичность (не совпадают цены, места и так далее), но это и не рандомные символы.
 // Такой вариант приемлем, поскольку по ТЗ эти данные пока никак не обрабатываются, но отобразить их нужно.
 func PublishTestData() {
-	slog.Info("generating fake data...")
+	slog.Info("creating new kafka writer for fake data...")
 
 	w := &kafka.Writer{
 		Addr:  kafka.TCP("kafka:9092"),
-		Topic: "orders",
-		// Balancer: &kafka.LeastBytes{},
+		Topic: "orders-1",
 	}
+
+	slog.Info("generating fake data...")
 
 	// Запись сообщений работает 1000 секунд. TODO: правильнее отменять через контекст?
 	for i := 0; i < 1000; i++ {
@@ -41,6 +42,8 @@ func PublishTestData() {
 		)
 		if err != nil {
 			slog.Error("failed to write messages: " + err.Error())
+		} else {
+			slog.Info("writing successful!")
 		}
 
 		time.Sleep(time.Second)

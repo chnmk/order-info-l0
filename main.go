@@ -25,17 +25,11 @@ func init() {
 	config.SetDefaultEnv()
 	config.GetEnv()
 
-	// Публикация пробных данных в Kafka (TODO: генерировать постоянно).
-	/*
-		if config.EnvVariables["PUBLISH_TEST_DATA"] == "1" {
-			test.PublishTestData()
-		}
-	*/
-
 	slog.Info("initialization complete")
 }
 
 func main() {
+
 	// Подключение к БД (TODO: использовать connection pool), пингуем (?) и создаем таблицы.
 	database.DB = database.Connect()
 	defer database.DB.Close(context.Background())
@@ -47,9 +41,13 @@ func main() {
 	memory.DATA.Init()
 	memory.DATA.RestoreData(database.DB)
 
-	// Подключение к Kafka (TODO: многопоточность?).
-	// go broker.Consume()
-	go broker.Consume()
+	broker.Init()
+
+	// Создание горутин для Кафки.
+	ctx_consumers := context.Background()
+	for i := 0; i < 1; i++ {
+		go broker.Consume(ctx_consumers)
+	}
 
 	// Генерация данных для Kafka
 	if config.EnvVariables["PUBLISH_TEST_DATA"] == "1" {

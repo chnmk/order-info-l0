@@ -4,44 +4,44 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
+	"time"
 
 	"github.com/chnmk/order-info-l0/internal/memory"
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/segmentio/kafka-go"
 )
 
-func Consume() {
-	slog.Info("connecting to kafka...")
+func Consume(ctx context.Context) {
+	slog.Info("creating new kafka reader...")
 
 	// make a new reader that consumes from orders
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:     []string{"kafka:9092"},
-		Topic:       "orders",
-		Partition:   0,
-		MaxBytes:    100e3, // 100kb
-		MaxAttempts: 20,
-
-		// (?) Пока отключим чтение уже прочитанных сообщений, чтобы не пытаться записать в память то что там уже есть.
-		StartOffset: kafka.LastOffset,
+		Brokers:        []string{"kafka:9092"},
+		GroupID:        "go-orders-1",
+		Topic:          "orders-1",
+		MaxBytes:       100e3, // 100kb
+		MaxAttempts:    20,
+		CommitInterval: 1 * time.Second,
 	})
 
+	slog.Info("reader created, reding messages...")
+
 	for {
-		m, err := r.ReadMessage(context.Background())
+		m, err := r.ReadMessage(ctx)
 		if err != nil {
 			slog.Error(err.Error())
 			break
 		}
 
-		// TODO: подумать
-		r.CommitMessages(context.TODO(), m)
-
-		slog.Info("got new msg")
+		slog.Info("got new order")
 		storeMsg(m.Value)
 	}
 
 	if err := r.Close(); err != nil {
 		slog.Error("failed to close reader: " + err.Error())
 	}
+
+	slog.Info("closing consumer connection...")
 }
 
 // Проверяет что нужные поля не пустые и соответствуют нашим требованиям.
