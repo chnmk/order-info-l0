@@ -4,13 +4,14 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/chnmk/order-info-l0/internal/memory"
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/jackc/pgx/v5"
 )
 
-var q_orders_ids = "SELECT order_uid FROM orders"
+var q_orders_ids = "SELECT id FROM orders"
 
-func GetOrdersIDs(db *pgx.Conn) []string {
+func GetOrdersIDs(db *pgx.Conn) []int {
 	rows, err := db.Query(context.Background(), q_orders_ids)
 	if err != nil {
 		slog.Error("QueryRow failed: " + err.Error())
@@ -18,9 +19,9 @@ func GetOrdersIDs(db *pgx.Conn) []string {
 
 	defer rows.Close()
 
-	var ids []string
+	var ids []int
 	for rows.Next() {
-		var id string
+		var id int
 		err = rows.Scan(&id)
 		if err != nil {
 			slog.Error("QueryRow failed: " + err.Error())
@@ -35,14 +36,14 @@ func GetOrdersIDs(db *pgx.Conn) []string {
 	return ids
 }
 
-func RestoreData(db *pgx.Conn) []models.Order {
-	var result []models.Order
+func RestoreData(db *pgx.Conn) map[int][]models.Order {
+	var result map[int][]models.Order
 
 	ids := GetOrdersIDs(db)
 
-	// Для каждого заказа (один models.Order из result) читаются данные из всех таблиц в БД по его order_uid
 	for _, id := range ids {
-		result = append(result, SelectOrderById(db, id))
+		key, order := SelectOrderById(db, id)
+		memory.DATA.AddOrder(key, order)
 	}
 
 	return result

@@ -14,6 +14,7 @@ import (
 Связывается с одной или несколькими записями в таблице items через таблицу itemsbind полем order_uid.
 */
 var createOrders = `CREATE TABLE IF NOT EXISTS orders (
+	id serial PRIMARY KEY,
 	order_uid VARCHAR(255) NOT NULL UNIQUE,
 	track_number VARCHAR(255),
 	entry VARCHAR(255),

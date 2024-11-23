@@ -91,11 +91,13 @@ var q_no_items = `
 */
 
 // Возвращает один заказ из базы данных по его order_uid.
-func SelectOrderById(db *pgx.Conn, order_uid string) models.Order {
+func SelectOrderById(db *pgx.Conn, id int) (int, models.Order) {
+	var key int
 	var order models.Order
 
 	// Получение данных из orders, delivery, payments. Порядок в Scan должен соответствовать порядку полей в запросе.
-	err := db.QueryRow(context.Background(), q_orders, order_uid).Scan(
+	err := db.QueryRow(context.Background(), q_orders, id).Scan(
+		&key,
 		&order.Order_uid,
 		&order.Track_number,
 		&order.Entry,
@@ -113,7 +115,7 @@ func SelectOrderById(db *pgx.Conn, order_uid string) models.Order {
 		slog.Error("QueryRow failed: " + err.Error())
 	}
 
-	err = db.QueryRow(context.Background(), q_delivery, order_uid).Scan(
+	err = db.QueryRow(context.Background(), q_delivery, id).Scan(
 		&order.Delivery.Name,
 		&order.Delivery.Phone,
 		&order.Delivery.Zip,
@@ -127,7 +129,7 @@ func SelectOrderById(db *pgx.Conn, order_uid string) models.Order {
 		slog.Error("QueryRow failed: " + err.Error())
 	}
 
-	err = db.QueryRow(context.Background(), q_payments, order_uid).Scan(
+	err = db.QueryRow(context.Background(), q_payments, id).Scan(
 		&order.Payment.Transaction,
 		&order.Payment.Request_id,
 		&order.Payment.Currency,
@@ -145,7 +147,7 @@ func SelectOrderById(db *pgx.Conn, order_uid string) models.Order {
 	}
 
 	// Получение данных из items. Порядок в Scan должен соответствовать порядку полей в запросе.
-	rows, err := db.Query(context.Background(), q_items, order_uid)
+	rows, err := db.Query(context.Background(), q_items, id)
 	if err != nil {
 		slog.Error("QueryRow failed: " + err.Error())
 	}
@@ -181,5 +183,5 @@ func SelectOrderById(db *pgx.Conn, order_uid string) models.Order {
 	order.Items = items
 
 	slog.Info("SelectOrderById: success")
-	return order
+	return key, order
 }

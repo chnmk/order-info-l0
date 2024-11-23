@@ -3,9 +3,10 @@ package broker
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log/slog"
 
+	"github.com/chnmk/order-info-l0/internal/database"
+	"github.com/chnmk/order-info-l0/internal/memory"
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/segmentio/kafka-go"
 )
@@ -34,6 +35,8 @@ func Consume() {
 
 		// TODO: подумать
 		r.CommitMessages(context.TODO(), m)
+
+		slog.Info("got new msg")
 		storeMsg(m.Value)
 	}
 
@@ -76,8 +79,9 @@ func storeMsg(m []byte) {
 		if ok := validateMsg(order); !ok {
 			slog.Info("failed to validate, skipping")
 		} else {
-			fmt.Println(order)
-			// database.InsertOrder(database.DB, order)
+			// slog.Info(order)
+			id := database.InsertOrder(database.DB, order)
+			memory.DATA.AddOrder(id, order)
 		}
 	}
 }

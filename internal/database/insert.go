@@ -18,7 +18,7 @@ var q_insert_order = `
 	INSERT INTO orders(order_uid, track_number, entry, locale, internal_signature, customer_id, 
 		delivery_service, shardkey, sm_id, date_created, oof_shard, delivery_id, payment_id)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-	RETURNING order_uid
+	RETURNING id
 `
 var q_insert_delivery = `
 	INSERT INTO delivery(name, phone, zip, city, address, region, email)
@@ -44,7 +44,7 @@ var q_insert_itemsbind = `
 	RETURNING id
 `
 
-func InsertOrder(db *pgx.Conn, order models.Order) {
+func InsertOrder(db *pgx.Conn, order models.Order) int {
 	slog.Info("adding order to database...")
 
 	row := db.QueryRow(context.Background(), q_insert_delivery,
@@ -99,7 +99,7 @@ func InsertOrder(db *pgx.Conn, order models.Order) {
 	)
 
 	// order_row используется только для проверки ответа
-	var order_id string
+	var order_id int
 	err = row.Scan(&order_id)
 	if err != nil {
 		slog.Error("Failed to insert data: " + err.Error())
@@ -136,4 +136,5 @@ func InsertOrder(db *pgx.Conn, order models.Order) {
 	}
 
 	slog.Info("order successfully added to database")
+	return order_id
 }
