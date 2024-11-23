@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"log"
 	"log/slog"
 
 	"github.com/chnmk/order-info-l0/internal/models"
@@ -61,7 +60,7 @@ func InsertOrder(db *pgx.Conn, order models.Order) {
 	var delivery_id int
 	err := row.Scan(&delivery_id)
 	if err != nil {
-		log.Fatalf("Failed to insert data: %v\n", err)
+		slog.Error("Failed to insert data: " + err.Error())
 	}
 
 	row = db.QueryRow(context.Background(), q_insert_payment,
@@ -80,7 +79,7 @@ func InsertOrder(db *pgx.Conn, order models.Order) {
 	var payment_id int
 	err = row.Scan(&payment_id)
 	if err != nil {
-		log.Fatalf("Failed to insert data: %v\n", err)
+		slog.Error("Failed to insert data: " + err.Error())
 	}
 
 	row = db.QueryRow(context.Background(), q_insert_order,
@@ -103,7 +102,7 @@ func InsertOrder(db *pgx.Conn, order models.Order) {
 	var order_id string
 	err = row.Scan(&order_id)
 	if err != nil {
-		log.Fatalf("Failed to insert data: %v\n", err)
+		slog.Error("Failed to insert data: " + err.Error())
 	}
 
 	for _, i := range order.Items {
@@ -124,7 +123,7 @@ func InsertOrder(db *pgx.Conn, order models.Order) {
 		var item_id int
 		err = row.Scan(&item_id)
 		if err != nil {
-			log.Fatalf("Failed to insert data: %v\n", err)
+			slog.Error("Failed to insert data: " + err.Error())
 		}
 
 		row = db.QueryRow(context.Background(), q_insert_itemsbind, order.Order_uid, item_id)
@@ -132,7 +131,7 @@ func InsertOrder(db *pgx.Conn, order models.Order) {
 		var bind_id int
 		err = row.Scan(&bind_id)
 		if err != nil {
-			log.Fatalf("Failed to insert data: %v\n", err)
+			slog.Error("Failed to insert data: " + err.Error())
 		}
 	}
 

@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	"log"
+	"log/slog"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -97,7 +97,7 @@ var createItemsbind = `CREATE TABLE IF NOT EXISTS itemsbind (
 
 /*
 Создаёт отсутствующие таблицы в базе данных.
-В случае ошибки вызывает log.Fatal().
+
 Не использует индексы из-за потенциально большого количества операций записи.
 */
 func CreateTables(db *pgx.Conn) {
@@ -106,7 +106,7 @@ func CreateTables(db *pgx.Conn) {
 	for _, q := range queries {
 		_, err := db.Exec(context.Background(), q)
 		if err != nil {
-			log.Fatalf("Failed to create table: %v\n", err)
+			slog.Error("Failed to create table " + err.Error())
 		}
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"log/slog"
 
 	"github.com/chnmk/order-info-l0/internal/models"
@@ -16,24 +15,30 @@ func Consume() {
 
 	// make a new reader that consumes from orders
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:   []string{"kafka:9092"},
-		Topic:     "orders",
-		Partition: 0,
-		MaxBytes:  100e3, // 100kb
+		Brokers:     []string{"kafka:9092"},
+		Topic:       "orders",
+		Partition:   0,
+		MaxBytes:    100e3, // 100kb
+		MaxAttempts: 20,
+
+		// (?) Пока отключим чтение уже прочитанных сообщений, чтобы не пытаться записать в память то что там уже есть.
+		StartOffset: kafka.LastOffset,
 	})
 
 	for {
 		m, err := r.ReadMessage(context.Background())
 		if err != nil {
-			slog.Info(err.Error())
+			slog.Error(err.Error())
 			break
 		}
 
+		// TODO: подумать
+		r.CommitMessages(context.TODO(), m)
 		storeMsg(m.Value)
 	}
 
 	if err := r.Close(); err != nil {
-		log.Fatal("failed to close reader:", err)
+		slog.Error("failed to close reader: " + err.Error())
 	}
 }
 

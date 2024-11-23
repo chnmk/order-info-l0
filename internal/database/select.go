@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"log"
 	"log/slog"
 
 	"github.com/chnmk/order-info-l0/internal/models"
@@ -111,7 +110,7 @@ func SelectOrderById(db *pgx.Conn, order_uid string) models.Order {
 	)
 
 	if err != nil {
-		log.Fatalf("QueryRow failed: %v\n", err)
+		slog.Error("QueryRow failed: " + err.Error())
 	}
 
 	err = db.QueryRow(context.Background(), q_delivery, order_uid).Scan(
@@ -125,7 +124,7 @@ func SelectOrderById(db *pgx.Conn, order_uid string) models.Order {
 	)
 
 	if err != nil {
-		log.Fatalf("QueryRow failed: %v\n", err)
+		slog.Error("QueryRow failed: " + err.Error())
 	}
 
 	err = db.QueryRow(context.Background(), q_payments, order_uid).Scan(
@@ -142,13 +141,13 @@ func SelectOrderById(db *pgx.Conn, order_uid string) models.Order {
 	)
 
 	if err != nil {
-		log.Fatalf("QueryRow failed: %v\n", err)
+		slog.Error("QueryRow failed: " + err.Error())
 	}
 
 	// Получение данных из items. Порядок в Scan должен соответствовать порядку полей в запросе.
 	rows, err := db.Query(context.Background(), q_items, order_uid)
 	if err != nil {
-		log.Fatalf("QueryRow failed: %v\n", err)
+		slog.Error("QueryRow failed: " + err.Error())
 	}
 
 	defer rows.Close()
@@ -170,13 +169,13 @@ func SelectOrderById(db *pgx.Conn, order_uid string) models.Order {
 			&i.Status,
 		)
 		if err != nil {
-			log.Fatalf("QueryRow failed: %v\n", err)
+			slog.Error("QueryRow failed: " + err.Error())
 		}
 		items = append(items, i)
 	}
 
 	if rows.Err() != nil {
-		log.Fatalf("QueryRow failed: %v\n", err)
+		slog.Error("QueryRow failed: " + err.Error())
 	}
 
 	order.Items = items

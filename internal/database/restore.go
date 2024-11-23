@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	"log"
+	"log/slog"
 
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/jackc/pgx/v5"
@@ -13,7 +13,7 @@ var q_orders_ids = "SELECT order_uid FROM orders"
 func GetOrdersIDs(db *pgx.Conn) []string {
 	rows, err := db.Query(context.Background(), q_orders_ids)
 	if err != nil {
-		log.Fatalf("QueryRow failed: %v\n", err)
+		slog.Error("QueryRow failed: " + err.Error())
 	}
 
 	defer rows.Close()
@@ -23,13 +23,13 @@ func GetOrdersIDs(db *pgx.Conn) []string {
 		var id string
 		err = rows.Scan(&id)
 		if err != nil {
-			log.Fatalf("QueryRow failed: %v\n", err)
+			slog.Error("QueryRow failed: " + err.Error())
 		}
 		ids = append(ids, id)
 	}
 
 	if rows.Err() != nil {
-		log.Fatalf("QueryRow failed: %v\n", err)
+		slog.Error("QueryRow failed: " + err.Error())
 	}
 
 	return ids

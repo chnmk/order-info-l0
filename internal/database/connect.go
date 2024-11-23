@@ -3,7 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/chnmk/order-info-l0/internal/config"
 	"github.com/jackc/pgx/v5"
@@ -22,7 +22,7 @@ func Connect() *pgx.Conn {
 
 	conn, err := pgx.Connect(context.Background(), url)
 	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
+		slog.Error("Unable to connect to database: " + err.Error())
 	}
 
 	return conn
@@ -31,6 +31,6 @@ func Connect() *pgx.Conn {
 func Ping(conn *pgx.Conn) {
 	err := conn.Ping(context.Background())
 	if err != nil {
-		log.Fatalf("QueryRow failed: %v\n", err)
+		slog.Error("QueryRow failed: " + err.Error())
 	}
 }

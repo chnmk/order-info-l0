@@ -3,7 +3,6 @@ package test
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"log/slog"
 	"math/rand"
 	"os"
@@ -34,21 +33,21 @@ func PublishTestData() {
 		gofakeit.Struct(&m)
 		data, err := json.Marshal(m)
 		if err != nil {
-			slog.Info(err.Error())
+			slog.Error(err.Error())
 		}
 
 		err = w.WriteMessages(context.Background(),
 			kafka.Message{Value: data},
 		)
 		if err != nil {
-			log.Fatal("failed to write messages:", err)
+			slog.Error("failed to write messages: " + err.Error())
 		}
 
 		time.Sleep(time.Second)
 	}
 
 	if err := w.Close(); err != nil {
-		log.Fatal("failed to close writer:", err)
+		slog.Error("failed to close writer: " + err.Error())
 	}
 
 	slog.Info("fake data generation stopped")
@@ -78,12 +77,12 @@ func ReadModelFile() (models.Order, []byte) {
 	var E models.Order
 	content, err := os.ReadFile("test/model.json")
 	if err != nil {
-		log.Fatal(err)
+		slog.Error(err.Error())
 	}
 
 	err = json.Unmarshal(content, &E)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error(err.Error())
 	}
 
 	return E, content
