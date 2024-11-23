@@ -15,9 +15,9 @@ import (
 Будем пока считать что никакой конкурентности нет. При необходимости воспользуемся транзакциями.
 */
 var q_insert_order = `
-	INSERT INTO orders(order_uid, track_number, entry, locale, internal_signature, customer_id, 
+	INSERT INTO orders(id, order_uid, track_number, entry, locale, internal_signature, customer_id, 
 		delivery_service, shardkey, sm_id, date_created, oof_shard, delivery_id, payment_id)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 	RETURNING id
 `
 var q_insert_delivery = `
@@ -39,12 +39,12 @@ var q_insert_item = `
 
 // Должен быть выполнен после запроса q_insert_item (как минимум пока транзакции не используются).
 var q_insert_itemsbind = `
-	INSERT INTO itemsbind(order_uid, item_id)
+	INSERT INTO itemsbind(order_id, item_id)
 	VALUES ($1, $2)
 	RETURNING id
 `
 
-func InsertOrder(db *pgx.Conn, order models.Order) int {
+func InsertOrder(db *pgx.Conn, order models.Order, key int) {
 	slog.Info("adding order to database...")
 
 	row := db.QueryRow(context.Background(), q_insert_delivery,
@@ -61,6 +61,7 @@ func InsertOrder(db *pgx.Conn, order models.Order) int {
 	err := row.Scan(&delivery_id)
 	if err != nil {
 		slog.Error("Failed to insert data: " + err.Error())
+		return
 	}
 
 	row = db.QueryRow(context.Background(), q_insert_payment,
@@ -80,9 +81,11 @@ func InsertOrder(db *pgx.Conn, order models.Order) int {
 	err = row.Scan(&payment_id)
 	if err != nil {
 		slog.Error("Failed to insert data: " + err.Error())
+		return
 	}
 
 	row = db.QueryRow(context.Background(), q_insert_order,
+		key,
 		order.Order_uid,
 		order.Track_number,
 		order.Entry,
@@ -103,6 +106,7 @@ func InsertOrder(db *pgx.Conn, order models.Order) int {
 	err = row.Scan(&order_id)
 	if err != nil {
 		slog.Error("Failed to insert data: " + err.Error())
+		return
 	}
 
 	for _, i := range order.Items {
@@ -126,7 +130,7 @@ func InsertOrder(db *pgx.Conn, order models.Order) int {
 			slog.Error("Failed to insert data: " + err.Error())
 		}
 
-		row = db.QueryRow(context.Background(), q_insert_itemsbind, order.Order_uid, item_id)
+		row = db.QueryRow(context.Background(), q_insert_itemsbind, order_id, item_id)
 		// bind_id используется только для проверки ответа
 		var bind_id int
 		err = row.Scan(&bind_id)
@@ -136,5 +140,4 @@ func InsertOrder(db *pgx.Conn, order models.Order) int {
 	}
 
 	slog.Info("order successfully added to database")
-	return order_id
 }

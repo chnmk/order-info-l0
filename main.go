@@ -43,9 +43,9 @@ func main() {
 	// database.Ping(database.DB)
 	database.CreateTables(database.DB)
 
-	// Инициализация хранилища и восстановление данных из БД (TODO: пошаманить с memory).
+	// Инициализация хранилища и восстановление данных из БД (TODO: пошаманить с memory?).
 	memory.DATA.Init()
-	database.RestoreData(database.DB)
+	memory.DATA.RestoreData(database.DB)
 
 	// Подключение к Kafka (TODO: многопоточность?).
 	// go broker.Consume()

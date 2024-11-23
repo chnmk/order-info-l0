@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"log/slog"
 
-	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/memory"
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/segmentio/kafka-go"
@@ -80,8 +79,7 @@ func storeMsg(m []byte) {
 			slog.Info("failed to validate, skipping")
 		} else {
 			// slog.Info(order)
-			id := database.InsertOrder(database.DB, order)
-			memory.DATA.AddOrder(id, order)
+			memory.DATA.AddOrder(order)
 		}
 	}
 }

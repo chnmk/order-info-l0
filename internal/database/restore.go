@@ -4,8 +4,6 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/chnmk/order-info-l0/internal/memory"
-	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -34,17 +32,4 @@ func GetOrdersIDs(db *pgx.Conn) []int {
 	}
 
 	return ids
-}
-
-func RestoreData(db *pgx.Conn) map[int][]models.Order {
-	var result map[int][]models.Order
-
-	ids := GetOrdersIDs(db)
-
-	for _, id := range ids {
-		key, order := SelectOrderById(db, id)
-		memory.DATA.AddOrder(key, order)
-	}
-
-	return result
 }
