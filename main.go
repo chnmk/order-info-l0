@@ -26,9 +26,11 @@ func init() {
 	config.GetEnv()
 
 	// Публикация пробных данных в Kafka (TODO: генерировать постоянно).
-	if config.EnvVariables["PUBLISH_TEST_DATA"] == "1" {
-		test.PublishTestData()
-	}
+	/*
+		if config.EnvVariables["PUBLISH_TEST_DATA"] == "1" {
+			test.PublishTestData()
+		}
+	*/
 
 	slog.Info("initialization complete")
 }
@@ -45,7 +47,14 @@ func main() {
 	memory.DATA = database.RestoreData(database.DB)
 
 	// Подключение к Kafka (TODO: многопоточность?).
+	// go broker.Consume()
 	go broker.Consume()
+
+	// Генерация данных для Kafka
+	if config.EnvVariables["PUBLISH_TEST_DATA"] == "1" {
+		test.GofakeInit()
+		go test.PublishTestData()
+	}
 
 	// Запуск сервера (TODO: обновить хендлеры).
 	http.HandleFunc("/orders", transport.GetOrder)

@@ -14,6 +14,65 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
+// Генерирует случайные корректные данные с использованием Gofakeit.
+//
+// Данные не претендуют на реалистичность (не совпадают цены, места и так далее), но это и не рандомные символы.
+// Такой вариант приемлем, поскольку по ТЗ эти данные пока никак не обрабатываются, но отобразить их нужно.
+func PublishTestData() {
+	slog.Info("generating fake data...")
+
+	w := &kafka.Writer{
+		Addr:  kafka.TCP("kafka:9092"),
+		Topic: "orders",
+		// Balancer: &kafka.LeastBytes{},
+	}
+
+	// Запись сообщений работает 1000 секунд. TODO: правильнее отменять через контекст?
+	for i := 0; i < 1000; i++ {
+		var m models.Order
+
+		gofakeit.Struct(&m)
+		data, err := json.Marshal(m)
+		if err != nil {
+			slog.Info(err.Error())
+		}
+
+		err = w.WriteMessages(context.Background(),
+			kafka.Message{Value: data},
+		)
+		if err != nil {
+			log.Fatal("failed to write messages:", err)
+		}
+
+		time.Sleep(time.Second)
+	}
+
+	if err := w.Close(); err != nil {
+		log.Fatal("failed to close writer:", err)
+	}
+
+	slog.Info("fake data generation stopped")
+}
+
+func GofakeInit() {
+	// Пример кастомной функции для генерации приближенных к реальности данных.
+	gofakeit.AddFuncLookup("wbdate", gofakeit.Info{
+		Category:    "custom",
+		Description: "random date string",
+		Example:     "2021-11-26T06:22:19Z",
+		Output:      "string",
+		Generate: func(f *gofakeit.Faker, m *gofakeit.MapParams, info *gofakeit.Info) (any, error) {
+			// Отнимает один месяц от сегодняшнего дня, переводит в формат unix.
+			min := time.Now().AddDate(0, -1, 0).Unix()
+			// Прибавляет к min случайное значение, таким образом получает дату между сегодня и месяц назад.
+			unix := min + rand.Int63n(time.Now().Unix()-min)
+
+			time := time.Unix(unix, 0).Format("2006-01-02T15:04:05Z")
+			return time, nil
+		},
+	})
+}
+
 // Читает файл model.json, возвращает его в виде структуры и []byte.
 func ReadModelFile() (models.Order, []byte) {
 	var E models.Order
@@ -28,109 +87,4 @@ func ReadModelFile() (models.Order, []byte) {
 	}
 
 	return E, content
-}
-
-/*
-Генерирует случайные корректные данные с использованием Gofakeit.
-
-Данные не претендуют на реалистичность (не совпадают цены, места и так далее), но это и не мусорные рандомные символы.
-Такой вариант приемлем, поскольку по ТЗ эти данные пока никак не обрабатываются, но отобразить их нужно.
-*/
-func GenerateFakeData() []kafka.Message {
-	var result []kafka.Message
-
-	slog.Info("generating fake data...")
-
-	// Пример кастомной функции для генерации приближенных к реальности данных.
-	gofakeit.AddFuncLookup("wbdate", gofakeit.Info{
-		Category:    "custom",
-		Description: "random date string",
-		Example:     "2021-11-26T06:22:19Z",
-		Output:      "string",
-		Generate: func(f *gofakeit.Faker, m *gofakeit.MapParams, info *gofakeit.Info) (any, error) {
-			// Отнимает один мечяц от сегодняшнего дня, переводит в формат unix.
-			min := time.Now().AddDate(0, -1, 0).Unix()
-			// Прибавляет к min случайное значение, таким образом получает дату между сегодня и месяц назад.
-			unix := min + rand.Int63n(time.Now().Unix()-min)
-
-			time := time.Unix(unix, 0).Format("2006-01-02T15:04:05Z")
-			return time, nil
-		},
-	})
-
-	// Генерируем 10 сообщений для кафки (TODO: скорее всего будем генерировать по одному, а кастомную функцию отдельно вынесем)
-	for i := 0; i < 10; i++ {
-		var order models.Order
-		gofakeit.Struct(&order)
-
-		msg, err := json.Marshal(order)
-		if err != nil {
-			slog.Error(err.Error())
-			return result
-		}
-
-		result = append(result, kafka.Message{Value: msg})
-	}
-
-	slog.Info("fake data generation finished")
-
-	return result
-}
-
-func PublishTestData() {
-	topic := "orders"
-	partition := 0
-
-	slog.Info("connecting to kafka to publish test data...")
-
-	conn, err := kafka.DialLeader(context.Background(), "tcp", "kafka:9092", topic, partition)
-	if err != nil {
-		log.Fatal("failed to dial leader:", err)
-	}
-
-	_, model := ReadModelFile()
-
-	slog.Info("writing invalid data...")
-
-	// Создаёт и записывает некорректные данные
-	conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
-	_, err = conn.WriteMessages(
-		kafka.Message{Value: InvalidFakeData(new(models.MockEmptyOrder))},
-		kafka.Message{Value: InvalidFakeData(new(models.MockEmptyOrderWithNumber))},
-		kafka.Message{Value: InvalidFakeData(new(models.MockNotOrder))},
-		kafka.Message{Value: InvalidFakeData(new(models.MockNotOrderWithNumber))},
-		kafka.Message{Value: InvalidFakeData(new(models.MockOrderIntIsString))},
-		kafka.Message{Value: []byte(gofakeit.Word())},
-		kafka.Message{Value: model},
-	)
-	if err != nil {
-		log.Fatal("failed to write messages:", err)
-	}
-
-	slog.Info("writing fake data...")
-
-	conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
-	_, err = conn.WriteMessages(
-		GenerateFakeData()...,
-	)
-	if err != nil {
-		log.Fatal("failed to write messages:", err)
-	}
-
-	if err := conn.Close(); err != nil {
-		log.Fatal("failed to close writer:", err)
-	}
-
-	slog.Info("test data successfully published")
-
-}
-
-func InvalidFakeData(mock interface{}) []byte {
-	gofakeit.Struct(&mock)
-
-	msg, err := json.Marshal(mock)
-	if err != nil {
-		slog.Error(err.Error())
-	}
-	return msg
 }
