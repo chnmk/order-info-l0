@@ -38,7 +38,7 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, result := database.SelectOrderById(database.DB, conv_id)
+	_, result := database.DB.SelectOrderById(conv_id)
 
 	/*
 		resp, err := json.Marshal(result)

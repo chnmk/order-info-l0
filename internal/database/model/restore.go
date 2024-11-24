@@ -1,16 +1,14 @@
-package database
+package db_model
 
 import (
 	"context"
 	"log/slog"
-
-	"github.com/jackc/pgx/v5"
 )
 
 var q_orders_ids = "SELECT id FROM orders"
 
-func GetOrdersIDs(db *pgx.Conn) []int {
-	rows, err := db.Query(context.Background(), q_orders_ids)
+func (db *PostgresDB) GetOrdersIDs() []int {
+	rows, err := db.DB.Query(context.Background(), q_orders_ids)
 	if err != nil {
 		slog.Error("QueryRow failed: " + err.Error())
 	}

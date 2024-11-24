@@ -13,6 +13,7 @@ import (
 	"github.com/chnmk/order-info-l0/internal/transport"
 	"github.com/chnmk/order-info-l0/internal/web"
 	"github.com/chnmk/order-info-l0/test"
+	"github.com/jackc/pgx/v5"
 )
 
 func init() {
@@ -29,17 +30,19 @@ func init() {
 }
 
 func main() {
+	database.DB = database.NewPostgresDB(&pgx.Conn{}, "full")
 
 	// Подключение к БД (TODO: использовать connection pool), пингуем (?) и создаем таблицы.
-	database.DB = database.Connect()
-	defer database.DB.Close(context.Background())
+	ctx_database := context.Background()
+	database.DB.Connect(ctx_database)
+	defer database.DB.Close(ctx_database)
 
-	// database.Ping(database.DB)
-	database.CreateTables(database.DB)
+	// database.DB.Ping()
+	database.DB.CreateTables()
 
 	// Инициализация хранилища и восстановление данных из БД (TODO: пошаманить с memory?).
 	memory.DATA.Init()
-	memory.DATA.RestoreData(database.DB)
+	memory.DATA.RestoreData()
 
 	broker.Init()
 

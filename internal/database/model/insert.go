@@ -1,4 +1,4 @@
-package database
+package db_model
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/chnmk/order-info-l0/internal/models"
-	"github.com/jackc/pgx/v5"
 )
 
 /*
@@ -46,10 +45,10 @@ var q_insert_itemsbind = `
 `
 
 // Пробует добавить заказ в БД, возвращает ошибку только в случае если заказ с таким order_uid уже существует.
-func InsertOrder(db *pgx.Conn, order models.Order, key int) error {
+func (db *PostgresDB) InsertOrder(order models.Order, key int) error {
 	slog.Info("adding order to database...")
 
-	row := db.QueryRow(context.Background(), q_insert_delivery,
+	row := db.DB.QueryRow(context.Background(), q_insert_delivery,
 		order.Delivery.Name,
 		order.Delivery.Phone,
 		order.Delivery.Zip,
@@ -66,7 +65,7 @@ func InsertOrder(db *pgx.Conn, order models.Order, key int) error {
 		return nil
 	}
 
-	row = db.QueryRow(context.Background(), q_insert_payment,
+	row = db.DB.QueryRow(context.Background(), q_insert_payment,
 		order.Payment.Transaction,
 		order.Payment.Request_id,
 		order.Payment.Currency,
@@ -86,7 +85,7 @@ func InsertOrder(db *pgx.Conn, order models.Order, key int) error {
 		return nil
 	}
 
-	row = db.QueryRow(context.Background(), q_insert_order,
+	row = db.DB.QueryRow(context.Background(), q_insert_order,
 		key,
 		order.Order_uid,
 		order.Track_number,
@@ -115,7 +114,7 @@ func InsertOrder(db *pgx.Conn, order models.Order, key int) error {
 	}
 
 	for _, i := range order.Items {
-		row = db.QueryRow(context.Background(), q_insert_item,
+		row = db.DB.QueryRow(context.Background(), q_insert_item,
 			i.Chrt_id,
 			i.Track_number,
 			i.Price,
@@ -136,7 +135,7 @@ func InsertOrder(db *pgx.Conn, order models.Order, key int) error {
 			return nil
 		}
 
-		row = db.QueryRow(context.Background(), q_insert_itemsbind, order_id, item_id)
+		row = db.DB.QueryRow(context.Background(), q_insert_itemsbind, order_id, item_id)
 		// bind_id используется только для проверки ответа
 		var bind_id int
 		err = row.Scan(&bind_id)

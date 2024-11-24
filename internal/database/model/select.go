@@ -1,11 +1,10 @@
-package database
+package db_model
 
 import (
 	"context"
 	"log/slog"
 
 	"github.com/chnmk/order-info-l0/internal/models"
-	"github.com/jackc/pgx/v5"
 )
 
 /*
@@ -56,12 +55,12 @@ var q_items = `
 `
 
 // Возвращает один заказ из базы данных по его order_uid.
-func SelectOrderById(db *pgx.Conn, id int) (int, models.Order) {
+func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 	var key int
 	var order models.Order
 
 	// Получение данных из orders, delivery, payments. Порядок в Scan должен соответствовать порядку полей в запросе.
-	err := db.QueryRow(context.Background(), q_orders, id).Scan(
+	err := db.DB.QueryRow(context.Background(), q_orders, id).Scan(
 		&key,
 		&order.Order_uid,
 		&order.Track_number,
@@ -80,7 +79,7 @@ func SelectOrderById(db *pgx.Conn, id int) (int, models.Order) {
 		slog.Error("QueryRow failed: " + err.Error())
 	}
 
-	err = db.QueryRow(context.Background(), q_delivery, id).Scan(
+	err = db.DB.QueryRow(context.Background(), q_delivery, id).Scan(
 		&order.Delivery.Name,
 		&order.Delivery.Phone,
 		&order.Delivery.Zip,
@@ -94,7 +93,7 @@ func SelectOrderById(db *pgx.Conn, id int) (int, models.Order) {
 		slog.Error("QueryRow failed: " + err.Error())
 	}
 
-	err = db.QueryRow(context.Background(), q_payments, id).Scan(
+	err = db.DB.QueryRow(context.Background(), q_payments, id).Scan(
 		&order.Payment.Transaction,
 		&order.Payment.Request_id,
 		&order.Payment.Currency,
@@ -112,7 +111,7 @@ func SelectOrderById(db *pgx.Conn, id int) (int, models.Order) {
 	}
 
 	// Получение данных из items. Порядок в Scan должен соответствовать порядку полей в запросе.
-	rows, err := db.Query(context.Background(), q_items, id)
+	rows, err := db.DB.Query(context.Background(), q_items, id)
 	if err != nil {
 		slog.Error("QueryRow failed: " + err.Error())
 	}

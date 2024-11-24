@@ -2,14 +2,19 @@ package broker
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 	"time"
 
 	"github.com/chnmk/order-info-l0/internal/memory"
-	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/segmentio/kafka-go"
 )
+
+/*
+TODO: написать объяснительную.
+
+Consumer group используются по нескольким причинам:
+	- Возможность напрямую использовать коммиты и не перечитывать старые сообщения.
+*/
 
 func Consume(ctx context.Context) {
 	slog.Info("creating new kafka reader...")
@@ -34,7 +39,7 @@ func Consume(ctx context.Context) {
 		}
 
 		slog.Info("got new order")
-		storeMsg(m.Value)
+		memory.UnmarshalBytes(m.Value)
 	}
 
 	if err := r.Close(); err != nil {
@@ -42,44 +47,4 @@ func Consume(ctx context.Context) {
 	}
 
 	slog.Info("closing consumer connection...")
-}
-
-// Проверяет что нужные поля не пустые и соответствуют нашим требованиям.
-//
-// Пока что нам точно нужны те данные, которые выводятся в веб-интерфейсе.
-func validateMsg(order models.Order) bool {
-	if order.Order_uid == "" ||
-		order.Delivery.Name == "" ||
-		order.Delivery.City == "" ||
-		order.Delivery.Address == "" ||
-		order.Delivery.Phone == "" ||
-		len(order.Items) < 1 {
-
-		return false
-	}
-
-	for _, i := range order.Items {
-		if i.Chrt_id == 0 ||
-			i.Name == "" ||
-			i.Total_price == 0 {
-			return false
-		}
-	}
-
-	return true
-}
-
-func storeMsg(m []byte) {
-	var order models.Order
-	err := json.Unmarshal(m, &order)
-	if err != nil {
-		slog.Info("failed to unmarshal, skipping")
-	} else {
-		if ok := validateMsg(order); !ok {
-			slog.Info("failed to validate, skipping")
-		} else {
-			// slog.Info(order)
-			memory.DATA.AddOrder(order)
-		}
-	}
 }

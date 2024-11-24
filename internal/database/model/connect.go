@@ -1,4 +1,4 @@
-package database
+package db_model
 
 import (
 	"context"
@@ -9,9 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-var DB *pgx.Conn
-
-func Connect() *pgx.Conn {
+func (db *PostgresDB) Connect(ctx context.Context) {
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
 		config.EnvVariables["DB_USER"],
 		config.EnvVariables["DB_PASSWORD"],
@@ -20,16 +18,20 @@ func Connect() *pgx.Conn {
 		config.EnvVariables["DB_NAME"],
 	)
 
-	conn, err := pgx.Connect(context.Background(), url)
+	var err error
+
+	db.DB, err = pgx.Connect(ctx, url)
 	if err != nil {
 		slog.Error("Unable to connect to database: " + err.Error())
 	}
-
-	return conn
 }
 
-func Ping(conn *pgx.Conn) {
-	err := conn.Ping(context.Background())
+func (db *PostgresDB) Close(ctx context.Context) {
+	db.DB.Close(ctx)
+}
+
+func (db *PostgresDB) Ping() {
+	err := db.DB.Ping(context.Background())
 	if err != nil {
 		slog.Error("QueryRow failed: " + err.Error())
 	}

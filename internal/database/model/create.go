@@ -1,10 +1,8 @@
-package database
+package db_model
 
 import (
 	"context"
 	"log/slog"
-
-	"github.com/jackc/pgx/v5"
 )
 
 /*
@@ -101,11 +99,11 @@ var createItemsbind = `CREATE TABLE IF NOT EXISTS itemsbind (
 
 Не использует индексы из-за потенциально большого количества операций записи.
 */
-func CreateTables(db *pgx.Conn) {
+func (db *PostgresDB) CreateTables() {
 	queries := []string{createOrders, createDelivery, createPayments, createItems, createItemsbind}
 
 	for _, q := range queries {
-		_, err := db.Exec(context.Background(), q)
+		_, err := db.DB.Exec(context.Background(), q)
 		if err != nil {
 			slog.Error("Failed to create table " + err.Error())
 		}
