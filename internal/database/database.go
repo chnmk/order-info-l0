@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/chnmk/order-info-l0/internal/config"
+	cfg "github.com/chnmk/order-info-l0/internal/config"
 	db_jsonb "github.com/chnmk/order-info-l0/internal/database/jsonb"
 	db_model "github.com/chnmk/order-info-l0/internal/database/model"
 	"github.com/chnmk/order-info-l0/internal/models"
@@ -29,16 +29,17 @@ type Database interface {
 
 // Создаёт подключение к PostgreSQL.
 //
-// От параметра cfg зависит схема базы данных заказов.
-// При cfg = "model" заказ делится на таблицы с отдельным полем под каждое значение.
-// При любом другом cfg (значение по умолчанию) заказ записывается в поле типа JSONB.
-func NewDB(db *pgxpool.Pool, ctx context.Context, cfg string) Database {
-	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
-		config.EnvVariables["DB_USER"],
-		config.EnvVariables["DB_PASSWORD"],
-		"postgres",
-		"5432",
-		config.EnvVariables["DB_NAME"],
+// От переменной окружения DB_INTERFACE_MODE зависит схема базы данных заказов.
+// При "model" заказ делится на таблицы с отдельным полем под каждое значение.
+// При любом другом значении (значение по умолчанию) заказ записывается в поле типа JSONB.
+func NewDB(db *pgxpool.Pool, ctx context.Context) Database {
+	url := fmt.Sprintf("%s://%s:%s@%s:%s/%s",
+		cfg.Env["POSTGRES_PROTOCOL"],
+		cfg.Env["POSTGRES_USER"],
+		cfg.Env["POSTGRES_PASSWORD"],
+		cfg.Env["POSTGRES_HOST"],
+		cfg.Env["POSTGRES_PORT"],
+		cfg.Env["POSTGRES_NAME"],
 	)
 
 	once.Do(func() {
@@ -50,7 +51,7 @@ func NewDB(db *pgxpool.Pool, ctx context.Context, cfg string) Database {
 
 	})
 
-	if cfg == "model" {
+	if cfg.Env["DB_INTERFACE_MODE"] == "model" {
 		return &db_model.PostgresDB{DB: db}
 	} else {
 		return &db_jsonb.PostgresDB{DB: db}

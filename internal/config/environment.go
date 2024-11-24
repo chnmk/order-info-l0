@@ -7,14 +7,27 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var EnvVariables map[string]string
+var Env map[string]string
 
 func SetDefaultEnv() {
-	EnvVariables = make(map[string]string)
-	EnvVariables["PUBLISH_TEST_DATA"] = "0"
-	EnvVariables["DB_NAME"] = "orders"
-	EnvVariables["DB_USER"] = "user"
-	EnvVariables["DB_PASSWORD"] = "12345"
+	Env = make(map[string]string)
+	Env["POSTGRES_DB"] = "orders"
+	Env["POSTGRES_USER"] = "user"
+	Env["POSTGRES_PASSWORD"] = "12345"
+	Env["DB_PROTOCOL"] = "postgres"
+	Env["DB_PORT"] = "5432"
+	Env["DB_HOST"] = "postgres"
+	Env["KAFKA_RECONNECT_ATTEMPTS"] = "20"
+	Env["KAFKA_NETWORK"] = "TCP"
+	Env["KAFKA_PROTOCOL"] = "kafka"
+	Env["KAFKA_PORT"] = "9092"
+	Env["KAFKA_TOPIC"] = "9092"
+	Env["KAFKA_GROUP_ID"] = "go-orders-1"
+	Env["KAFKA_MAX_BYTES"] = "100e3" // 100kb
+	Env["KAFKA_COMMIT_INVERVAL_SECONDS"] = "1"
+	Env["CONSUMER_GOROUTINES"] = "1"
+	Env["SERVER_PORT"] = "3000"
+	Env["TEST_PUBLISH_DATA"] = "0"
 }
 
 func GetEnv() {
@@ -25,12 +38,12 @@ func GetEnv() {
 
 	slog.Info("Reading environment variables...")
 
-	for name, def := range EnvVariables {
+	for name, def := range Env {
 		value, exists := os.LookupEnv(name)
 		if exists {
 			// TODO: переписать эти ошибки
 			slog.Info(name + ": " + value)
-			EnvVariables[name] = value
+			Env[name] = value
 		} else {
 			slog.Info(name + " not found, using default (" + def + ")")
 		}

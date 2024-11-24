@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
+	"strconv"
 
-	"github.com/chnmk/order-info-l0/internal/config"
+	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/consumer"
 	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/memory"
@@ -23,8 +25,8 @@ func init() {
 	slog.Info("initialization start...")
 
 	// Переменные окружения.
-	config.SetDefaultEnv()
-	config.GetEnv()
+	cfg.SetDefaultEnv()
+	cfg.GetEnv()
 
 	slog.Info("initialization complete")
 }
@@ -32,7 +34,7 @@ func init() {
 func main() {
 	// Подключение к БД, пингуем и создаем таблицы.
 	ctx_data := context.Background()
-	database.DB = database.NewDB(&pgxpool.Pool{}, ctx_data, "")
+	database.DB = database.NewDB(&pgxpool.Pool{}, ctx_data)
 	defer database.DB.Close()
 
 	database.DB.Ping()
@@ -45,13 +47,20 @@ func main() {
 	// Инициализация подключения к брокеру сообщений и создание горутин.
 	ctx_consumers := context.Background()
 	consumer.Init()
-	for i := 0; i < 1; i++ {
+
+	routines, err := strconv.Atoi(cfg.Env["CONSUMER_GOROUTINES"])
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+
+	for i := 0; i < routines; i++ {
 		c := consumer.NewConsumer()
 		go c.Read(ctx_consumers)
 	}
 
 	// Генерация данных для брокера.
-	if config.EnvVariables["PUBLISH_TEST_DATA"] == "1" {
+	if cfg.Env["PUBLISH_TEST_DATA"] == "1" {
 		test.GofakeInit()
 		go test.PublishTestData()
 	}
@@ -60,7 +69,7 @@ func main() {
 	http.HandleFunc("/orders", transport.GetOrder)
 	http.HandleFunc("/", web.DisplayTemplate)
 
-	err := http.ListenAndServe(":3000", nil)
+	err = http.ListenAndServe(fmt.Sprintf(":%s", cfg.Env["SERVER_PORT"]), nil)
 	if err != nil {
 		panic(err)
 	}

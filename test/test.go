@@ -3,12 +3,14 @@ package test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"math/rand"
 	"os"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
+	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/segmentio/kafka-go"
 )
@@ -21,8 +23,8 @@ func PublishTestData() {
 	slog.Info("creating new kafka writer for fake data...")
 
 	w := &kafka.Writer{
-		Addr:  kafka.TCP("kafka:9092"),
-		Topic: "orders-1",
+		Addr:  kafka.TCP(fmt.Sprintf("%s:%s", cfg.Env["KAFKA_PROTOCOL"], cfg.Env["KAFKA_PORT"])),
+		Topic: cfg.Env["KAFKA_TOPIC"],
 	}
 
 	slog.Info("generating fake data...")
