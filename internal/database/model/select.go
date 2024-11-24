@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/chnmk/order-info-l0/internal/models"
+	"github.com/jackc/pgx/v5"
 )
 
 /*
@@ -16,7 +17,7 @@ var q_orders = `
 	SELECT id, order_uid, track_number, entry,
 	locale, internal_signature, customer_id, delivery_service, shardkey, sm_id, date_created, oof_shard
 	FROM orders 
-	WHERE id = $1
+	WHERE id = @id
 `
 
 /*
@@ -27,7 +28,7 @@ var q_delivery = `
 	FROM delivery d
 	LEFT JOIN orders o
 		ON d.id = o.delivery_id
-	WHERE o.id = $1
+	WHERE o.id = @id
 `
 
 /*
@@ -38,7 +39,7 @@ var q_payments = `
 	FROM payments p
 	LEFT JOIN orders o
 		ON p.id = o.payment_id
-	WHERE o.id = $1
+	WHERE o.id = @id
 `
 
 /*
@@ -51,16 +52,17 @@ var q_items = `
 		on i.id = ib.item_id
 	LEFT JOIN orders o
 		on ib.order_id = o.id
-	WHERE o.id = $1
+	WHERE o.id = @id
 `
 
 // Возвращает один заказ из базы данных по его order_uid.
 func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 	var key int
 	var order models.Order
+	args := pgx.NamedArgs{"id": id}
 
 	// Получение данных из orders, delivery, payments. Порядок в Scan должен соответствовать порядку полей в запросе.
-	err := db.DB.QueryRow(context.Background(), q_orders, id).Scan(
+	err := db.DB.QueryRow(context.Background(), q_orders, args).Scan(
 		&key,
 		&order.Order_uid,
 		&order.Track_number,
@@ -79,7 +81,7 @@ func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 		slog.Error("QueryRow failed: " + err.Error())
 	}
 
-	err = db.DB.QueryRow(context.Background(), q_delivery, id).Scan(
+	err = db.DB.QueryRow(context.Background(), q_delivery, args).Scan(
 		&order.Delivery.Name,
 		&order.Delivery.Phone,
 		&order.Delivery.Zip,
@@ -93,7 +95,7 @@ func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 		slog.Error("QueryRow failed: " + err.Error())
 	}
 
-	err = db.DB.QueryRow(context.Background(), q_payments, id).Scan(
+	err = db.DB.QueryRow(context.Background(), q_payments, args).Scan(
 		&order.Payment.Transaction,
 		&order.Payment.Request_id,
 		&order.Payment.Currency,
@@ -111,7 +113,7 @@ func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 	}
 
 	// Получение данных из items. Порядок в Scan должен соответствовать порядку полей в запросе.
-	rows, err := db.DB.Query(context.Background(), q_items, id)
+	rows, err := db.DB.Query(context.Background(), q_items, args)
 	if err != nil {
 		slog.Error("QueryRow failed: " + err.Error())
 	}
