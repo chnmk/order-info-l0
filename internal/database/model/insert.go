@@ -2,6 +2,7 @@ package db_model
 
 import (
 	"context"
+	"encoding/json"
 	"log/slog"
 	"strings"
 
@@ -53,7 +54,15 @@ var q_insert_itemsbind = `
 `
 
 // Пробует добавить заказ в БД, возвращает ошибку только в случае если заказ с таким order_uid уже существует.
-func (db *PostgresDB) InsertOrder(key int, order models.Order, ctx context.Context) error {
+func (db *PostgresDB) InsertOrder(key int, m []byte, ctx context.Context) error {
+	// Чтобы не передавать кучу данных во все вторичные реализации БД, приходится опять декодировать заказ здесь.
+	var order models.Order
+	err := json.Unmarshal(m, &order)
+	if err != nil {
+		slog.Error("Failed to marshal order during db insert operation: " + err.Error())
+		return nil
+	}
+
 	slog.Info("starting insert transaction...")
 
 	tx, err := db.DB.Begin(ctx)

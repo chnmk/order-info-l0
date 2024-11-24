@@ -1,10 +1,8 @@
 package memory
 
 import (
-	"context"
 	"log/slog"
 
-	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
@@ -21,13 +19,7 @@ func (d *MemStore) AddOrder(value models.Order) {
 		return
 	}
 
-	err := database.DB.InsertOrder(d.currentkey, value, context.Background())
-	if err != nil {
-		slog.Error("Failed to add order: order already exists")
-		return
-	}
-
 	d.orders[d.currentkey] = value
-	slog.Info("added order to memory storage")
+	slog.Info("finished adding order to memory storage")
 	d.currentkey++
 }

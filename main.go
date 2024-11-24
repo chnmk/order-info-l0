@@ -32,7 +32,7 @@ func init() {
 func main() {
 	// Подключение к БД, пингуем и создаем таблицы.
 	ctx_data := context.Background()
-	database.DB = database.NewDB(&pgxpool.Pool{}, ctx_data, "full")
+	database.DB = database.NewDB(&pgxpool.Pool{}, ctx_data, "")
 	defer database.DB.Close()
 
 	database.DB.Ping()

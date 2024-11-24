@@ -1,10 +1,12 @@
 package memory
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"sync"
 
+	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
@@ -38,13 +40,20 @@ func HandleMessage(m []byte) {
 		defer wg.Done()
 		var order models.Order
 
-		if err := json.Unmarshal(m, &order); err != nil {
+		err := json.Unmarshal(m, &order)
+		if err != nil {
 			slog.Info("failed to unmarshal, skipping")
 			return
 		}
 
 		if ok := ValidateMsg(order); !ok {
 			slog.Info("failed to validate, skipping")
+			return
+		}
+
+		err = database.DB.InsertOrder(DATA.currentkey, m, context.Background())
+		if err != nil {
+			slog.Error("failed to add order: order already exists")
 			return
 		}
 
