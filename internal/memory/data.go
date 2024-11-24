@@ -1,12 +1,10 @@
 package memory
 
 import (
-	"context"
 	"encoding/json"
 	"log/slog"
 	"sync"
 
-	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
@@ -31,19 +29,30 @@ func (d *MemStore) Init() {
 	DATA.orders = make(map[int]models.Order)
 }
 
-func UnmarshalBytes(m []byte) {
-	var order models.Order
-	err := json.Unmarshal(m, &order)
-	if err != nil {
-		slog.Info("failed to unmarshal, skipping")
-	} else {
+// Обрабатывает сообщение в горутине.
+func HandleMessage(m []byte) {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var order models.Order
+
+		if err := json.Unmarshal(m, &order); err != nil {
+			slog.Info("failed to unmarshal, skipping")
+			return
+		}
+
 		if ok := ValidateMsg(order); !ok {
 			slog.Info("failed to validate, skipping")
-		} else {
-			// slog.Info(order)
-			DATA.AddOrder(order)
+			return
 		}
-	}
+
+		DATA.AddOrder(order)
+	}()
+
+	wg.Wait()
+	slog.Info("order handling finished")
 }
 
 // Проверяет что нужные поля не пустые и соответствуют нашим требованиям.
@@ -69,28 +78,4 @@ func ValidateMsg(order models.Order) bool {
 	}
 
 	return true
-}
-
-// Добавляет заказ value в память.
-func (d *MemStore) AddOrder(value models.Order) {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
-	slog.Info("adding order to memory storage...")
-
-	_, ok := d.orders[d.currentkey]
-	if ok {
-		slog.Error("Failed to add order: id already exists")
-		return
-	}
-
-	err := database.DB.InsertOrder(d.currentkey, value, context.Background())
-	if err != nil {
-		slog.Error("Failed to add order: order already exists")
-		return
-	}
-
-	d.orders[d.currentkey] = value
-	slog.Info("added order to memory storage")
-	d.currentkey++
 }

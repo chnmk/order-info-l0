@@ -38,8 +38,8 @@ func Consume(ctx context.Context) {
 			break
 		}
 
-		slog.Info("got new order")
-		memory.UnmarshalBytes(m.Value)
+		slog.Info("=== handling new order ===")
+		memory.HandleMessage(m.Value)
 	}
 
 	if err := r.Close(); err != nil {
