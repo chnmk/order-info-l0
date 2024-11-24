@@ -5,12 +5,10 @@ import (
 	"log/slog"
 )
 
-/*
-Строка для создания таблицы с информацией о заказах.
+// Строка для создания таблицы с информацией о заказах.
 
-Таблица связывается с одной записью в таблице "delivery" через поле delivery_id и одной записью в таблице "payment" через поле payment_id.
-Связывается с одной или несколькими записями в таблице items через таблицу itemsbind полем order_uid.
-*/
+// Таблица связывается с одной записью в таблице "delivery" через поле delivery_id и одной записью в таблице "payment" через поле payment_id.
+// Связывается с одной или несколькими записями в таблице items через таблицу itemsbind полем order_uid.
 var createOrders = `CREATE TABLE IF NOT EXISTS orders (
 	id INTEGER PRIMARY KEY,
 	order_uid VARCHAR(255) NOT NULL UNIQUE,
@@ -28,11 +26,9 @@ var createOrders = `CREATE TABLE IF NOT EXISTS orders (
     oof_shard VARCHAR(255)
 	)`
 
-/*
-Строка для создания таблицы с информацией о доставке заказов.
-
-Каждая запись в таблице orders связывается с одной записью в этой таблице.
-*/
+// Строка для создания таблицы с информацией о доставке заказов.
+//
+// Каждая запись в таблице orders связывается с одной записью в этой таблице.
 var createDelivery = `CREATE TABLE IF NOT EXISTS delivery (
 	id serial PRIMARY KEY, 
 	name VARCHAR(255),
@@ -44,11 +40,9 @@ var createDelivery = `CREATE TABLE IF NOT EXISTS delivery (
 	email VARCHAR(255)
 	)`
 
-/*
-Строка для создания таблицы с информацией о платежах.
-
-Каждая запись в таблице orders связывается с одной записью в этой таблице.
-*/
+// Строка для создания таблицы с информацией о платежах.
+//
+// Каждая запись в таблице orders связывается с одной записью в этой таблице.
 var createPayments = `CREATE TABLE IF NOT EXISTS payments (
 	id serial PRIMARY KEY,
 	transaction VARCHAR(255),
@@ -63,11 +57,9 @@ var createPayments = `CREATE TABLE IF NOT EXISTS payments (
 	custom_fee INTEGER
 	)`
 
-/*
-Строка для создания таблицы с информацией о товаре.
-
-Через таблицу itemsbind полем id несколько предметов из этой таблицы могут быть связаны с одним заказом из таблицы orders.
-*/
+// трока для создания таблицы с информацией о товаре.
+//
+// Через таблицу itemsbind полем id несколько предметов из этой таблицы могут быть связаны с одним заказом из таблицы orders.
 var createItems = `CREATE TABLE IF NOT EXISTS items (
 	id serial PRIMARY KEY,
 	chrt_id INTEGER,
@@ -83,22 +75,18 @@ var createItems = `CREATE TABLE IF NOT EXISTS items (
 	status INTEGER
 	)`
 
-/*
-Строка для создания таблицы Itemsbind.
-
-Эта таблица связывает один заказ из таблицы orders с несколькими предметами из таблицы items.
-*/
+// Строка для создания таблицы Itemsbind.
+//
+// Эта таблица связывает один заказ из таблицы orders с несколькими предметами из таблицы items.
 var createItemsbind = `CREATE TABLE IF NOT EXISTS itemsbind (
 	id serial PRIMARY KEY,
 	order_id INTEGER,
 	item_id INTEGER
 	)`
 
-/*
-Создаёт отсутствующие таблицы в базе данных.
-
-Не использует индексы из-за потенциально большого количества операций записи.
-*/
+// Создаёт отсутствующие таблицы в базе данных.
+//
+// Не использует индексы из-за потенциально значительно большего количества операций записи чем чтения.
 func (db *PostgresDB) CreateTables() {
 	queries := []string{createOrders, createDelivery, createPayments, createItems, createItemsbind}
 

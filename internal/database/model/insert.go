@@ -9,12 +9,9 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-/*
-Вставляет в таблицу данные о заказе и связывает их с самыми новыми записями в delivery и payment.
-
-Запросы q_insert_delivery и q_insert_item должны быть выполнены раньше.
-Будем пока считать что никакой конкурентности нет. При необходимости воспользуемся транзакциями.
-*/
+// Добавляет в таблицу данные о заказе и связывает их с самыми новыми записями в delivery и payment.
+//
+// Запросы q_insert_delivery и q_insert_item должны быть выполнены раньше.
 var q_insert_order = `
 	INSERT INTO orders(id, order_uid, track_number, entry, locale, internal_signature, customer_id, 
 		delivery_service, shardkey, sm_id, date_created, oof_shard, delivery_id, payment_id)
@@ -22,11 +19,15 @@ var q_insert_order = `
 		@delivery_service, @shardkey, @sm_id, @date_created, @oof_shard, @delivery_id, @payment_id)
 	RETURNING id
 `
+
+// Добавляет данные в таблицу delivery.
 var q_insert_delivery = `
 	INSERT INTO delivery(name, phone, zip, city, address, region, email)
 	VALUES (@name, @phone, @zip, @city, @address, @region, @email)
 	RETURNING id
 `
+
+// Добавляет данные в таблицу payments.
 var q_insert_payment = `
 	INSERT INTO payments(transaction, request_id, currency, provider, amount, payment_dt, bank, 
 	delivery_cost, goods_total, custom_fee)
@@ -34,13 +35,17 @@ var q_insert_payment = `
 	@delivery_cost, @goods_total, @custom_fee)
 	RETURNING id
 `
+
+// Добавляет данные в таблицу items.
 var q_insert_item = `
 	INSERT INTO items(chrt_id, track_number, price, rid, name, sale, size, total_price, nm_id, brand, status)
 	VALUES (@chrt_id, @track_number, @price, @rid, @name, @sale, @size, @total_price, @nm_id, @brand, @status)
 	RETURNING id
 `
 
-// Должен быть выполнен после запроса q_insert_item (как минимум пока транзакции не используются).
+// Добавляет данные в таблицу itemsbind.
+//
+// Запрос должен быть выполнен после запроса q_insert_item.
 var q_insert_itemsbind = `
 	INSERT INTO itemsbind(order_id, item_id)
 	VALUES (@order_id, @item_id)
@@ -115,7 +120,6 @@ func (db *PostgresDB) InsertOrder(key int, order models.Order, ctx context.Conte
 	}
 	row = tx.QueryRow(context.Background(), q_insert_order, args)
 
-	// order_row используется только для проверки ответа
 	var order_id int
 	err = row.Scan(&order_id)
 	if err != nil {

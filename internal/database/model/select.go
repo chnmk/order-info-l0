@@ -8,11 +8,9 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-/*
-Строка для получения данных из таблицы orders.
-
-Не получает данные из таблиц delivery, payments и items.
-*/
+// Строка для получения данных из таблицы orders.
+//
+// Не получает данные из таблиц delivery, payments и items.
 var q_orders = `
 	SELECT id, order_uid, track_number, entry,
 	locale, internal_signature, customer_id, delivery_service, shardkey, sm_id, date_created, oof_shard
@@ -20,9 +18,7 @@ var q_orders = `
 	WHERE id = @id
 `
 
-/*
-Строка для получения данных из таблицы delivery.
-*/
+// Строка для получения данных из таблицы delivery.
 var q_delivery = `
 	SELECT name, phone, zip, city, address, region, email
 	FROM delivery d
@@ -31,9 +27,7 @@ var q_delivery = `
 	WHERE o.id = @id
 `
 
-/*
-Строка для получения данных из таблицы payments.
-*/
+// Строка для получения данных из таблицы payments.
 var q_payments = `
 	SELECT transaction, request_id, currency, provider, amount, payment_dt, bank, delivery_cost, goods_total, custom_fee
 	FROM payments p
@@ -42,9 +36,7 @@ var q_payments = `
 	WHERE o.id = @id
 `
 
-/*
-Строка для получения данных из items.
-*/
+// Строка для получения данных из items.
 var q_items = `
 	SELECT chrt_id, i.track_number, price, rid, name, sale, size, total_price, nm_id, brand, status
 	FROM items i
