@@ -3,6 +3,7 @@ package broker
 import (
 	"context"
 	"log/slog"
+	"os"
 	"time"
 
 	"github.com/segmentio/kafka-go"
@@ -20,6 +21,10 @@ func Init() {
 			break
 		}
 		time.Sleep(1 * time.Second)
+	}
+	if err != nil {
+		slog.Error("Kafka connection failed: " + err.Error())
+		os.Exit(1)
 	}
 	conn.Close()
 }

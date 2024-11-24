@@ -13,7 +13,7 @@ import (
 	"github.com/chnmk/order-info-l0/internal/transport"
 	"github.com/chnmk/order-info-l0/internal/web"
 	"github.com/chnmk/order-info-l0/test"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func init() {
@@ -30,14 +30,12 @@ func init() {
 }
 
 func main() {
-	database.DB = database.NewPostgresDB(&pgx.Conn{}, "full")
-
-	// Подключение к БД (TODO: использовать connection pool), пингуем (?) и создаем таблицы.
+	// Подключение к БД, пингуем и создаем таблицы.
 	ctx_database := context.Background()
-	database.DB.Connect(ctx_database)
-	defer database.DB.Close(ctx_database)
+	database.DB = database.NewDB(&pgxpool.Pool{}, ctx_database, "full")
+	defer database.DB.Close()
 
-	// database.DB.Ping()
+	database.DB.Ping()
 	database.DB.CreateTables()
 
 	// Инициализация хранилища и восстановление данных из БД (TODO: пошаманить с memory?).
