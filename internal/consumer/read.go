@@ -1,4 +1,4 @@
-package broker
+package consumer
 
 import (
 	"context"
@@ -16,11 +16,10 @@ Consumer group используются по нескольким причина
 	- Возможность напрямую использовать коммиты и не перечитывать старые сообщения.
 */
 
-func Consume(ctx context.Context) {
+func (c *KafkaConsumer) Read(ctx context.Context) {
 	slog.Info("creating new kafka reader...")
 
-	// make a new reader that consumes from orders
-	r := kafka.NewReader(kafka.ReaderConfig{
+	c.Reader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        []string{"kafka:9092"},
 		GroupID:        "go-orders-1",
 		Topic:          "orders-1",
@@ -32,7 +31,7 @@ func Consume(ctx context.Context) {
 	slog.Info("reader created, reding messages...")
 
 	for {
-		m, err := r.ReadMessage(ctx)
+		m, err := c.Reader.ReadMessage(ctx)
 		if err != nil {
 			slog.Error(err.Error())
 			break
@@ -42,7 +41,7 @@ func Consume(ctx context.Context) {
 		memory.DATA.HandleMessage(m.Value)
 	}
 
-	if err := r.Close(); err != nil {
+	if err := c.Reader.Close(); err != nil {
 		slog.Error("failed to close reader: " + err.Error())
 	}
 

@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/chnmk/order-info-l0/internal/broker"
 	"github.com/chnmk/order-info-l0/internal/config"
+	"github.com/chnmk/order-info-l0/internal/consumer"
 	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/memory"
 	"github.com/chnmk/order-info-l0/internal/transport"
@@ -44,9 +44,10 @@ func main() {
 
 	// Инициализация подключения к брокеру сообщений и создание горутин.
 	ctx_consumers := context.Background()
-	broker.Init()
+	consumer.Init()
 	for i := 0; i < 1; i++ {
-		go broker.Consume(ctx_consumers)
+		c := consumer.NewConsumer()
+		go c.Read(ctx_consumers)
 	}
 
 	// Генерация данных для брокера.

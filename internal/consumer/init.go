@@ -1,4 +1,4 @@
-package broker
+package consumer
 
 import (
 	"context"
@@ -26,5 +26,6 @@ func Init() {
 		slog.Error("Kafka connection failed: " + err.Error())
 		os.Exit(1)
 	}
+
 	conn.Close()
 }
