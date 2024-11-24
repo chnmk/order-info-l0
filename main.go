@@ -38,19 +38,18 @@ func main() {
 	database.DB.Ping()
 	database.DB.CreateTables()
 
-	// Инициализация хранилища и восстановление данных из БД (TODO: пошаманить с memory?).
-	memory.DATA.Init()
+	// Инициализация хранилища и восстановление данных из БД.
+	memory.DATA = memory.NewStorage()
 	memory.DATA.RestoreData()
 
-	broker.Init()
-
-	// Создание горутин для Кафки.
+	// Инициализация подключения к брокеру сообщений и создание горутин.
 	ctx_consumers := context.Background()
+	broker.Init()
 	for i := 0; i < 1; i++ {
 		go broker.Consume(ctx_consumers)
 	}
 
-	// Генерация данных для Kafka
+	// Генерация данных для брокера.
 	if config.EnvVariables["PUBLISH_TEST_DATA"] == "1" {
 		test.GofakeInit()
 		go test.PublishTestData()

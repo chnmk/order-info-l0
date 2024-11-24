@@ -39,7 +39,7 @@ func Consume(ctx context.Context) {
 		}
 
 		slog.Info("=== handling new order ===")
-		memory.HandleMessage(m.Value)
+		memory.DATA.HandleMessage(m.Value)
 	}
 
 	if err := r.Close(); err != nil {
