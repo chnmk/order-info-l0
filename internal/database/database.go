@@ -23,7 +23,7 @@ type Database interface {
 	CreateTables()
 	GetOrdersIDs() []int
 	SelectOrderById(int) (int, models.Order)
-	InsertOrder(models.Order, int) error
+	InsertOrder(int, models.Order, context.Context) error
 }
 
 func NewDB(db *pgxpool.Pool, ctx context.Context, cfg string) Database {

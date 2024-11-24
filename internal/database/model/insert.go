@@ -48,8 +48,15 @@ var q_insert_itemsbind = `
 `
 
 // Пробует добавить заказ в БД, возвращает ошибку только в случае если заказ с таким order_uid уже существует.
-func (db *PostgresDB) InsertOrder(order models.Order, key int) error {
-	slog.Info("adding order to database...")
+func (db *PostgresDB) InsertOrder(key int, order models.Order, ctx context.Context) error {
+	slog.Info("starting insert transaction...")
+
+	tx, err := db.DB.Begin(ctx)
+	if err != nil {
+		slog.Error("Failed to begin transaction: " + err.Error())
+		return nil
+	}
+	defer tx.Rollback(ctx)
 
 	args := pgx.NamedArgs{
 		"name":    order.Delivery.Name,
@@ -60,10 +67,10 @@ func (db *PostgresDB) InsertOrder(order models.Order, key int) error {
 		"region":  order.Delivery.Region,
 		"email":   order.Delivery.Email,
 	}
-	row := db.DB.QueryRow(context.Background(), q_insert_delivery, args)
+	row := tx.QueryRow(context.Background(), q_insert_delivery, args)
 
 	var delivery_id int
-	err := row.Scan(&delivery_id)
+	err = row.Scan(&delivery_id)
 	if err != nil {
 		slog.Error("Failed to insert data: " + err.Error())
 		return nil
@@ -81,7 +88,7 @@ func (db *PostgresDB) InsertOrder(order models.Order, key int) error {
 		"goods_total":   order.Payment.Goods_total,
 		"custom_fee":    order.Payment.Custom_fee,
 	}
-	row = db.DB.QueryRow(context.Background(), q_insert_payment, args)
+	row = tx.QueryRow(context.Background(), q_insert_payment, args)
 
 	var payment_id int
 	err = row.Scan(&payment_id)
@@ -106,7 +113,7 @@ func (db *PostgresDB) InsertOrder(order models.Order, key int) error {
 		"delivery_id":        delivery_id,
 		"payment_id":         payment_id,
 	}
-	row = db.DB.QueryRow(context.Background(), q_insert_order, args)
+	row = tx.QueryRow(context.Background(), q_insert_order, args)
 
 	// order_row используется только для проверки ответа
 	var order_id int
@@ -133,7 +140,7 @@ func (db *PostgresDB) InsertOrder(order models.Order, key int) error {
 			"brand":        i.Brand,
 			"status":       i.Status,
 		}
-		row = db.DB.QueryRow(context.Background(), q_insert_item, args)
+		row = tx.QueryRow(context.Background(), q_insert_item, args)
 
 		var item_id int
 		err = row.Scan(&item_id)
@@ -146,7 +153,7 @@ func (db *PostgresDB) InsertOrder(order models.Order, key int) error {
 			"order_id": order_id,
 			"item_id":  item_id,
 		}
-		row = db.DB.QueryRow(context.Background(), q_insert_itemsbind, args)
+		row = tx.QueryRow(context.Background(), q_insert_itemsbind, args)
 
 		// bind_id используется только для проверки ответа
 		var bind_id int
@@ -157,6 +164,12 @@ func (db *PostgresDB) InsertOrder(order models.Order, key int) error {
 		}
 	}
 
-	slog.Info("added order to database")
+	err = tx.Commit(ctx)
+	if err != nil {
+		slog.Error("Failed to commit transaction: " + err.Error())
+		return nil
+	}
+
+	slog.Info("insert transaction committed")
 	return nil
 }

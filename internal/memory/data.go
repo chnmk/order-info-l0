@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"sync"
@@ -79,13 +80,13 @@ func (d *MemStore) AddOrder(value models.Order) {
 
 	_, ok := d.orders[d.currentkey]
 	if ok {
-		slog.Error("failed to add order: id already exists")
+		slog.Error("Failed to add order: id already exists")
 		return
 	}
 
-	err := database.DB.InsertOrder(value, d.currentkey)
+	err := database.DB.InsertOrder(d.currentkey, value, context.Background())
 	if err != nil {
-		slog.Error("failed to add order: order already exists")
+		slog.Error("Failed to add order: order already exists")
 		return
 	}
 

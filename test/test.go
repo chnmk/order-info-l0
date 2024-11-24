@@ -41,7 +41,7 @@ func PublishTestData() {
 			kafka.Message{Value: data},
 		)
 		if err != nil {
-			slog.Error("failed to write messages: " + err.Error())
+			slog.Error("Failed to write messages: " + err.Error())
 		} else {
 			slog.Info("writing successful!")
 		}
@@ -50,7 +50,7 @@ func PublishTestData() {
 	}
 
 	if err := w.Close(); err != nil {
-		slog.Error("failed to close writer: " + err.Error())
+		slog.Error("Failed to close writer: " + err.Error())
 	}
 
 	slog.Info("fake data generation stopped")
