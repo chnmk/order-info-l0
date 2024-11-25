@@ -18,12 +18,12 @@ func SetDefaultEnv() {
 	Env["DB_PORT"] = "5432"
 	Env["DB_HOST"] = "postgres"
 	Env["KAFKA_RECONNECT_ATTEMPTS"] = "20"
-	Env["KAFKA_NETWORK"] = "TCP"
+	Env["KAFKA_NETWORK"] = "tcp"
 	Env["KAFKA_PROTOCOL"] = "kafka"
 	Env["KAFKA_PORT"] = "9092"
 	Env["KAFKA_TOPIC"] = "9092"
 	Env["KAFKA_GROUP_ID"] = "go-orders-1"
-	Env["KAFKA_MAX_BYTES"] = "100e3" // 100kb
+	Env["KAFKA_MAX_BYTES"] = "100000" // 100kb
 	Env["KAFKA_COMMIT_INVERVAL_SECONDS"] = "1"
 	Env["CONSUMER_GOROUTINES"] = "1"
 	Env["SERVER_PORT"] = "3000"

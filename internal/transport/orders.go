@@ -49,8 +49,17 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 		}
 	*/
 
-	tmpl, _ := template.ParseFiles("templates/index.html")
+	slog.Info("executing template...")
+
+	tmpl, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		slog.Info(err.Error())
+		return
+	}
+
 	tmpl.Execute(w, result)
+
+	slog.Info("template successfully executed")
 
 	slog.Info("request successfull")
 }

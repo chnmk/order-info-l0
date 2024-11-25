@@ -13,7 +13,6 @@ import (
 	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/memory"
 	"github.com/chnmk/order-info-l0/internal/transport"
-	"github.com/chnmk/order-info-l0/internal/web"
 	"github.com/chnmk/order-info-l0/test"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -60,14 +59,14 @@ func main() {
 	}
 
 	// Генерация данных для брокера.
-	if cfg.Env["PUBLISH_TEST_DATA"] == "1" {
+	if cfg.Env["TEST_PUBLISH_DATA"] == "1" {
 		test.GofakeInit()
 		go test.PublishTestData()
 	}
 
 	// Запуск сервера (TODO: обновить хендлеры).
 	http.HandleFunc("/orders", transport.GetOrder)
-	http.HandleFunc("/", web.DisplayTemplate)
+	http.HandleFunc("/", transport.DisplayPage)
 
 	err = http.ListenAndServe(fmt.Sprintf(":%s", cfg.Env["SERVER_PORT"]), nil)
 	if err != nil {

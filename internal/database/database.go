@@ -34,12 +34,12 @@ type Database interface {
 // При любом другом значении (значение по умолчанию) заказ записывается в поле типа JSONB.
 func NewDB(db *pgxpool.Pool, ctx context.Context) Database {
 	url := fmt.Sprintf("%s://%s:%s@%s:%s/%s",
-		cfg.Env["POSTGRES_PROTOCOL"],
+		cfg.Env["DB_PROTOCOL"],
 		cfg.Env["POSTGRES_USER"],
 		cfg.Env["POSTGRES_PASSWORD"],
-		cfg.Env["POSTGRES_HOST"],
-		cfg.Env["POSTGRES_PORT"],
-		cfg.Env["POSTGRES_NAME"],
+		cfg.Env["DB_HOST"],
+		cfg.Env["DBS_PORT"],
+		cfg.Env["POSTGRES_DB"],
 	)
 
 	once.Do(func() {

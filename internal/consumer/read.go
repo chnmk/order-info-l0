@@ -18,6 +18,7 @@ TODO: написать объяснительную.
 
 Consumer group используются по нескольким причинам:
 	- Возможность напрямую использовать коммиты и не перечитывать старые сообщения.
+	- Потенциальная поддержка многопоточности.
 */
 
 func (c *KafkaConsumer) Read(ctx context.Context) {
@@ -50,7 +51,7 @@ func (c *KafkaConsumer) Read(ctx context.Context) {
 		CommitInterval: time.Duration(interv) * time.Second,
 	})
 
-	slog.Info("reader created, reding messages...")
+	slog.Info("reader created, reading messages...")
 
 	for {
 		m, err := c.Reader.ReadMessage(ctx)
