@@ -6,13 +6,13 @@ import (
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
-func (d *MemStore) Read(id int) models.Order {
+func (m *MemStore) Read(id int) models.Order {
 	slog.Info("reading from memory storage...")
 
-	d.mu.Lock()
-	defer d.mu.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
-	order, ok := d.orders[id]
+	order, ok := m.orders[id]
 	if ok {
 		slog.Error("Failed to read order from memory: id doesn't exist")
 		return order

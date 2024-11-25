@@ -34,8 +34,8 @@ type MemStore struct {
 	orders     map[int]models.Order
 }
 
-func (d *MemStore) init() {
-	d.orders = make(map[int]models.Order)
+func (m *MemStore) init() {
+	m.orders = make(map[int]models.Order)
 }
 
 func NewStorage() Storage {

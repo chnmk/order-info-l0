@@ -24,8 +24,9 @@ func init() {
 	slog.Info("initialization start...")
 
 	// Переменные окружения.
-	cfg.SetDefaultEnv()
-	cfg.GetEnv()
+	cfg.Env = cfg.NewConfig()
+	cfg.Env.InitEnv()
+	cfg.Env.GetEnv()
 
 	slog.Info("initialization complete")
 }

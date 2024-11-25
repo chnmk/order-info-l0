@@ -9,11 +9,11 @@ import (
 )
 
 // Забирает все данные из БД, устанавливает значение currentkey на максимальное id заказа из БД.
-func (d *MemStore) RestoreData() {
+func (m *MemStore) RestoreData() {
 	slog.Info("restoring data from DB...")
 
-	d.mu.Lock()
-	defer d.mu.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
 	ids := database.DB.GetOrdersIDs()
 	if len(ids) == 0 {
@@ -25,10 +25,10 @@ func (d *MemStore) RestoreData() {
 	for _, id := range ids {
 		key, order := database.DB.SelectOrderById(id)
 		slog.Info(strconv.Itoa(key))
-		d.orders[key] = order
+		m.orders[key] = order
 	}
 
-	d.currentkey = slices.Max(ids) + 1
+	m.currentkey = slices.Max(ids) + 1
 
 	slog.Info("data successfully restored")
 }

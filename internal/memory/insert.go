@@ -7,19 +7,19 @@ import (
 )
 
 // Добавляет заказ value в память.
-func (d *MemStore) AddOrder(value models.Order) {
+func (m *MemStore) AddOrder(value models.Order) {
 	slog.Info("adding order to memory storage...")
 
-	d.mu.Lock()
-	defer d.mu.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
-	_, ok := d.orders[d.currentkey]
+	_, ok := m.orders[m.currentkey]
 	if ok {
 		slog.Error("Failed to add order: id already exists")
 		return
 	}
 
-	d.orders[d.currentkey] = value
+	m.orders[m.currentkey] = value
 	slog.Info("finished adding order to memory storage")
-	d.currentkey++
+	m.currentkey++
 }

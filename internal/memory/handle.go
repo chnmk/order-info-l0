@@ -11,7 +11,7 @@ import (
 )
 
 // Обрабатывает сообщение в горутине.
-func (d *MemStore) HandleMessage(m []byte) {
+func (m *MemStore) HandleMessage(b []byte) {
 	var wg sync.WaitGroup
 
 	wg.Add(1)
@@ -19,7 +19,7 @@ func (d *MemStore) HandleMessage(m []byte) {
 		defer wg.Done()
 		var order models.Order
 
-		err := json.Unmarshal(m, &order)
+		err := json.Unmarshal(b, &order)
 		if err != nil {
 			slog.Info("failed to unmarshal, skipping")
 			return
@@ -30,40 +30,15 @@ func (d *MemStore) HandleMessage(m []byte) {
 			return
 		}
 
-		err = database.DB.InsertOrder(d.currentkey, m, context.Background())
+		err = database.DB.InsertOrder(m.currentkey, b, context.Background())
 		if err != nil {
 			slog.Error("failed to add order: order already exists")
 			return
 		}
 
-		d.AddOrder(order)
+		m.AddOrder(order)
 	}()
 
 	wg.Wait()
 	slog.Info("order handling finished")
-}
-
-// Проверяет что нужные поля не пустые и соответствуют нашим требованиям.
-//
-// Пока что нам точно нужны те данные, которые выводятся в веб-интерфейсе.
-func ValidateMsg(order models.Order) bool {
-	if order.Order_uid == "" ||
-		order.Delivery.Name == "" ||
-		order.Delivery.City == "" ||
-		order.Delivery.Address == "" ||
-		order.Delivery.Phone == "" ||
-		len(order.Items) < 1 {
-
-		return false
-	}
-
-	for _, i := range order.Items {
-		if i.Chrt_id == 0 ||
-			i.Name == "" ||
-			i.Total_price == 0 {
-			return false
-		}
-	}
-
-	return true
 }
