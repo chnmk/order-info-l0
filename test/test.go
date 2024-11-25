@@ -3,7 +3,6 @@ package test
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"math/rand"
 	"os"
@@ -22,9 +21,10 @@ import (
 func PublishTestData() {
 	slog.Info("creating new kafka writer for fake data...")
 
+	// Возможно эта функция будет вызываться много раз в горутинах, так что лучше не получать каждый раз переменные окружения по-новой.
 	w := &kafka.Writer{
-		Addr:  kafka.TCP(fmt.Sprintf("%s:%s", cfg.Env["KAFKA_PROTOCOL"], cfg.Env["KAFKA_PORT"])),
-		Topic: cfg.Env["KAFKA_TOPIC"],
+		Addr:  cfg.KafkaWriterAddr,
+		Topic: cfg.KafkaWriterTopic,
 	}
 
 	slog.Info("generating fake data...")

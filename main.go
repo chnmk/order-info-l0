@@ -26,7 +26,7 @@ func init() {
 	// Переменные окружения.
 	cfg.Env = cfg.NewConfig()
 	cfg.Env.InitEnv()
-	cfg.Env.GetEnv()
+	cfg.Env.ReadEnv()
 
 	slog.Info("initialization complete")
 }
@@ -48,7 +48,7 @@ func main() {
 	ctx_consumers := context.Background()
 	consumer.Init()
 
-	routines, err := strconv.Atoi(cfg.Env["CONSUMER_GOROUTINES"])
+	routines, err := strconv.Atoi(cfg.Env.Get("CONSUMER_GOROUTINES"))
 	if err != nil {
 		slog.Error(err.Error())
 		os.Exit(1)
@@ -60,7 +60,7 @@ func main() {
 	}
 
 	// Генерация данных для брокера.
-	if cfg.Env["TEST_PUBLISH_DATA"] == "1" {
+	if cfg.Env.Get("TEST_PUBLISH_DATA") == "1" {
 		test.GofakeInit()
 		go test.PublishTestData()
 	}
@@ -69,7 +69,7 @@ func main() {
 	http.HandleFunc("/orders", transport.GetOrder)
 	http.HandleFunc("/", transport.DisplayPage)
 
-	err = http.ListenAndServe(fmt.Sprintf(":%s", cfg.Env["SERVER_PORT"]), nil)
+	err = http.ListenAndServe(fmt.Sprintf(":%s", cfg.Env.Get("SERVER_PORT")), nil)
 	if err != nil {
 		panic(err)
 	}

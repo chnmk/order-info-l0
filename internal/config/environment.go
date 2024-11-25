@@ -28,7 +28,7 @@ func (e *EnvStorage) InitEnv() {
 	e.Env["TEST_PUBLISH_DATA"] = "0"
 }
 
-func (e *EnvStorage) GetEnv() {
+func (e *EnvStorage) ReadEnv() {
 	err := godotenv.Load()
 	if err != nil {
 		slog.Info("Warning: .env file not found")
@@ -46,4 +46,11 @@ func (e *EnvStorage) GetEnv() {
 			slog.Info(name + " not found, using default (" + def + ")")
 		}
 	}
+}
+
+func (e *EnvStorage) Get(key string) string {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
+	return e.Env[key]
 }
