@@ -38,7 +38,7 @@ func main() {
 	cfg.DB.CreateTables()
 
 	// Инициализация хранилища и восстановление данных из БД.
-	memory.NewStorage()
+	cfg.Data = memory.NewStorage(cfg.Data)
 	cfg.Data.RestoreData()
 
 	// Инициализация подключения к брокеру сообщений и создание горутин.

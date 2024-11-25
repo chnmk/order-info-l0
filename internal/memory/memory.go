@@ -3,7 +3,6 @@ package memory
 import (
 	"sync"
 
-	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
@@ -28,9 +27,11 @@ func (m *MemStore) Init() {
 	m.orders = make(map[int]models.Order)
 }
 
-func NewStorage() {
+func NewStorage(m models.Storage) models.Storage {
 	once.Do(func() {
-		cfg.Data = &MemStore{}
-		cfg.Data.Init()
+		m = &MemStore{}
+		m.Init()
 	})
+
+	return m
 }
