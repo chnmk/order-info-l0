@@ -1,12 +1,13 @@
 package transport
 
 import (
+	"encoding/json"
 	"log/slog"
 	"net/http"
 	"strconv"
 	"text/template"
 
-	"github.com/chnmk/order-info-l0/internal/database"
+	"github.com/chnmk/order-info-l0/internal/memory"
 )
 
 func GetOrder(w http.ResponseWriter, r *http.Request) {
@@ -20,6 +21,7 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Получает id заказа (1, 2, 3..., т.е. порядковый id из кэша, а не order_uid).
 	id := r.URL.Query().Get("id")
 	if id == "" {
 		slog.Info("invalid request: no id")
@@ -31,35 +33,60 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 
 	conv_id, err := strconv.Atoi(id)
 	if err != nil {
-		slog.Info("error: id should be a number")
+		slog.Info("invalid request: id should be a number")
 
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("error: id should be a number"))
+		w.Write([]byte("invalid request: id should be a number"))
 		return
 	}
 
-	_, result := database.DB.SelectOrderById(conv_id)
+	// Получает сам заказ из памяти.
+	result := memory.DATA.Read(conv_id)
+	if result.Order_uid == "" {
+		slog.Info("invalid request: order not found")
 
-	/*
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("invalid request: order not found"))
+		return
+	}
+
+	// Получает параметр format.
+	// При format == "html" возвращает страницу с данными.
+	// При любом другом значении возвращает JSON.
+	format := r.URL.Query().Get("format")
+
+	if format == "html" {
+		// Возвращаем страницу.
+		slog.Info("executing template...")
+
+		tmpl, err := template.ParseFiles("templates/index.html")
+		if err != nil {
+			slog.Info(err.Error())
+			return
+		}
+
+		tmpl.Execute(w, result)
+
+		slog.Info("template successfully executed")
+
+	} else {
+		// Формат html не указан, возвращаем JSON.
+		if format == "" {
+			slog.Info("response format not defined")
+		}
+
+		slog.Info("sending response...")
+
 		resp, err := json.Marshal(result)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("error"))
 			return
 		}
-	*/
 
-	slog.Info("executing template...")
-
-	tmpl, err := template.ParseFiles("templates/index.html")
-	if err != nil {
-		slog.Info(err.Error())
-		return
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
 	}
-
-	tmpl.Execute(w, result)
-
-	slog.Info("template successfully executed")
 
 	slog.Info("request successfull")
 }

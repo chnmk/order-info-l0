@@ -13,7 +13,7 @@ import (
 //
 // Не получает данные из таблиц delivery, payments и items.
 var q_jsonorders = `
-	SELECT jsonorder
+	SELECT *
 	FROM jsonorders 
 	WHERE id = @id
 `
@@ -25,7 +25,7 @@ func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 	var orderjson []byte
 
 	args := pgx.NamedArgs{"id": id}
-	err := db.DB.QueryRow(context.Background(), q_jsonorders, args).Scan(&orderjson)
+	err := db.DB.QueryRow(context.Background(), q_jsonorders, args).Scan(&key, &orderjson)
 	if err != nil {
 		slog.Error("QueryRow failed: " + err.Error())
 	}

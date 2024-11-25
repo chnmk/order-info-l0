@@ -8,10 +8,10 @@ import (
 
 // Добавляет заказ value в память.
 func (d *MemStore) AddOrder(value models.Order) {
+	slog.Info("adding order to memory storage...")
+
 	d.mu.Lock()
 	defer d.mu.Unlock()
-
-	slog.Info("adding order to memory storage...")
 
 	_, ok := d.orders[d.currentkey]
 	if ok {

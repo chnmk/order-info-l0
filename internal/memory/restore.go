@@ -3,16 +3,17 @@ package memory
 import (
 	"log/slog"
 	"slices"
+	"strconv"
 
 	"github.com/chnmk/order-info-l0/internal/database"
 )
 
 // Забирает все данные из БД, устанавливает значение currentkey на максимальное id заказа из БД.
 func (d *MemStore) RestoreData() {
+	slog.Info("restoring data from DB...")
+
 	d.mu.Lock()
 	defer d.mu.Unlock()
-
-	slog.Info("restoring data from DB...")
 
 	ids := database.DB.GetOrdersIDs()
 	if len(ids) == 0 {
@@ -23,6 +24,7 @@ func (d *MemStore) RestoreData() {
 	// TODO: у нас будут интерфейсы, так что скорее всего че-т поумнее придумаем.
 	for _, id := range ids {
 		key, order := database.DB.SelectOrderById(id)
+		slog.Info(strconv.Itoa(key))
 		d.orders[key] = order
 	}
 

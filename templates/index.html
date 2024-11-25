@@ -14,8 +14,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 100dvh;
-            width: 100vw;
+            min-height: 100vh;
+            min-width: 100vw;
             background: linear-gradient(#e664db, #c291e5);
         }
         .card {
@@ -52,10 +52,11 @@
                 Введите id
             </h3>
             <div>
-                Пример: b563feb7b2b84b6test
+                Пример: 1
             </div>
             <div>
                 <form action="/orders">
+                    <input type="hidden" name="format" value="html" />
                     <input type="text" id="id" name="id" value=""/>
                     <button type="submit" value="Submit">GO</button>
                 </form>

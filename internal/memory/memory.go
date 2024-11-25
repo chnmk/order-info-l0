@@ -24,6 +24,7 @@ type Storage interface {
 	init()
 	HandleMessage([]byte)
 	AddOrder(models.Order)
+	Read(int) models.Order
 	RestoreData()
 }
 
