@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/chnmk/order-info-l0/internal/memory"
+	"github.com/chnmk/order-info-l0/internal/config"
 )
 
 func GetOrder(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +41,7 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Получает сам заказ из памяти.
-	result := memory.DATA.Read(conv_id)
+	result := config.Data.Read(conv_id)
 	if result.Order_uid == "" {
 		slog.Info("invalid request: order not found")
 

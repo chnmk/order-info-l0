@@ -13,7 +13,6 @@ import (
 	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/memory"
 	"github.com/chnmk/order-info-l0/internal/transport"
-	"github.com/chnmk/order-info-l0/test"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -23,26 +22,24 @@ func init() {
 	slog.SetDefault(logger)
 	slog.Info("initialization start...")
 
-	// Переменные окружения.
+	// Получает переменные окружения и их значения по умолчанию, проставляет переменные для других пакетов.
 	cfg.Env = cfg.NewConfig()
-	cfg.Env.InitEnv()
-	cfg.Env.ReadEnv()
 
 	slog.Info("initialization complete")
 }
 
 func main() {
-	// Подключение к БД, пингуем и создаем таблицы.
-	ctx_data := context.Background()
-	database.DB = database.NewDB(&pgxpool.Pool{}, ctx_data)
-	defer database.DB.Close()
+	// Подключается к БД, пингует и создает таблицы.
+	ctx_db := context.Background()
+	cfg.DB = database.NewDB(&pgxpool.Pool{}, ctx_db)
+	defer cfg.DB.Close()
 
-	database.DB.Ping()
-	database.DB.CreateTables()
+	cfg.DB.Ping()
+	cfg.DB.CreateTables()
 
 	// Инициализация хранилища и восстановление данных из БД.
-	memory.DATA = memory.NewStorage()
-	memory.DATA.RestoreData()
+	memory.NewStorage()
+	cfg.Data.RestoreData()
 
 	// Инициализация подключения к брокеру сообщений и создание горутин.
 	ctx_consumers := context.Background()
@@ -60,9 +57,9 @@ func main() {
 	}
 
 	// Генерация данных для брокера.
-	if cfg.Env.Get("TEST_PUBLISH_DATA") == "1" {
-		test.GofakeInit()
-		go test.PublishTestData()
+	if cfg.Env.Get("CONSUMER_PUBLISH_EXAMPLES") == "1" {
+		consumer.GofakeInit()
+		go consumer.PublishExampleData()
 	}
 
 	// Запуск сервера (TODO: обновить хендлеры).

@@ -16,10 +16,10 @@ func Init() {
 
 	for i := 0; i < cfg.KafkaReconnectAttempts; i++ {
 		conn, err = kafka.DialLeader(context.Background(),
-			cfg.ConsumerInitNetwork,
-			cfg.ConsumerInitAddress,
-			cfg.ConsumerInitTopic,
-			cfg.ConsumerInitPartition,
+			cfg.KafkaInitNework,
+			cfg.KafkaInitAddress,
+			cfg.KafkaInitTopic,
+			cfg.KafkaInitPartition,
 		)
 
 		if err != nil {

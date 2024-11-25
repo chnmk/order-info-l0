@@ -7,7 +7,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func (e *EnvStorage) InitEnv() {
+func (e *EnvStorage) initEnv() {
 	e.Env = make(map[string]string)
 	e.Env["POSTGRES_DB"] = "orders"
 	e.Env["POSTGRES_USER"] = "user"
@@ -24,11 +24,11 @@ func (e *EnvStorage) InitEnv() {
 	e.Env["KAFKA_MAX_BYTES"] = "100000" // 100kb
 	e.Env["KAFKA_COMMIT_INVERVAL_SECONDS"] = "1"
 	e.Env["CONSUMER_GOROUTINES"] = "1"
+	e.Env["CONSUMER_PUBLISH_EXAMPLES"] = "0"
 	e.Env["SERVER_PORT"] = "3000"
-	e.Env["TEST_PUBLISH_DATA"] = "0"
 }
 
-func (e *EnvStorage) ReadEnv() {
+func (e *EnvStorage) readEnv() {
 	err := godotenv.Load()
 	if err != nil {
 		slog.Info("Warning: .env file not found")

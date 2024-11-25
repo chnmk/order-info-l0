@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/chnmk/order-info-l0/internal/database"
+	cfg "github.com/chnmk/order-info-l0/internal/config"
 )
 
 // Забирает все данные из БД, устанавливает значение currentkey на максимальное id заказа из БД.
@@ -15,7 +15,7 @@ func (m *MemStore) RestoreData() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	ids := database.DB.GetOrdersIDs()
+	ids := cfg.DB.GetOrdersIDs()
 	if len(ids) == 0 {
 		slog.Info("no data found in DB, restoring canceled")
 		return
@@ -23,7 +23,7 @@ func (m *MemStore) RestoreData() {
 
 	// TODO: у нас будут интерфейсы, так что скорее всего че-т поумнее придумаем.
 	for _, id := range ids {
-		key, order := database.DB.SelectOrderById(id)
+		key, order := cfg.DB.SelectOrderById(id)
 		slog.Info(strconv.Itoa(key))
 		m.orders[key] = order
 	}

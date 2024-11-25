@@ -9,8 +9,8 @@ var (
 )
 
 type Config interface {
-	InitEnv()
-	ReadEnv()
+	initEnv()
+	readEnv()
 	Get(string) string
 }
 
@@ -25,8 +25,8 @@ func (e *EnvStorage) init() {
 func NewConfig() Config {
 	once.Do(func() {
 		Env = &EnvStorage{}
-		Env.InitEnv()
-		Env.ReadEnv()
+		Env.initEnv()
+		Env.readEnv()
 		getConsumerVars()
 		getDatabaseVars()
 		getTestVars()

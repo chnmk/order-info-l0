@@ -3,6 +3,7 @@ package memory
 import (
 	"sync"
 
+	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
@@ -15,18 +16,7 @@ TODO: написать объяснительную.
 	или проще всё-таки написать id=1 и на этом всё
 */
 
-var (
-	DATA Storage
-	once sync.Once
-)
-
-type Storage interface {
-	init()
-	HandleMessage([]byte)
-	AddOrder(models.Order)
-	Read(int) models.Order
-	RestoreData()
-}
+var once sync.Once
 
 type MemStore struct {
 	mu         sync.Mutex
@@ -34,15 +24,13 @@ type MemStore struct {
 	orders     map[int]models.Order
 }
 
-func (m *MemStore) init() {
+func (m *MemStore) Init() {
 	m.orders = make(map[int]models.Order)
 }
 
-func NewStorage() Storage {
+func NewStorage() {
 	once.Do(func() {
-		DATA = &MemStore{}
-		DATA.init()
+		cfg.Data = &MemStore{}
+		cfg.Data.Init()
 	})
-
-	return DATA
 }

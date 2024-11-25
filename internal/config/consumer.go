@@ -11,19 +11,19 @@ import (
 )
 
 var (
-	ConsumerInitNetwork    string
-	ConsumerInitAddress    string
-	ConsumerInitTopic      string
-	ConsumerInitPartition  int
+	KafkaInitNework        string
+	KafkaInitAddress       string
+	KafkaInitTopic         string
+	KafkaInitPartition     int
 	KafkaReconnectAttempts int
 	KafkaReaderConfig      kafka.ReaderConfig
 )
 
 func getConsumerVars() {
-	ConsumerInitNetwork = Env.Get("KAFKA_NETWORK")
-	ConsumerInitAddress = fmt.Sprintf("%s:%s", Env.Get("KAFKA_PROTOCOL"), Env.Get("KAFKA_PORT"))
-	ConsumerInitTopic = Env.Get("KAFKA_TOPIC")
-	ConsumerInitPartition = 0
+	KafkaInitNework = Env.Get("KAFKA_NETWORK")
+	KafkaInitAddress = fmt.Sprintf("%s:%s", Env.Get("KAFKA_PROTOCOL"), Env.Get("KAFKA_PORT"))
+	KafkaInitTopic = Env.Get("KAFKA_TOPIC")
+	KafkaInitPartition = 0
 	KafkaReconnectAttempts = getKafkaReconnectAttempts()
 	KafkaReaderConfig = getKafkaReaderConfig()
 }

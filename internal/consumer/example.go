@@ -1,11 +1,10 @@
-package test
+package consumer
 
 import (
 	"context"
 	"encoding/json"
 	"log/slog"
 	"math/rand"
-	"os"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
@@ -18,7 +17,7 @@ import (
 //
 // Данные не претендуют на реалистичность (не совпадают цены, места и так далее), но это и не рандомные символы.
 // Такой вариант приемлем, поскольку по ТЗ эти данные пока никак не обрабатываются, но отобразить их нужно.
-func PublishTestData() {
+func PublishExampleData() {
 	slog.Info("creating new kafka writer for fake data...")
 
 	// Возможно эта функция будет вызываться много раз в горутинах, так что лучше не получать каждый раз переменные окружения по-новой.
@@ -75,20 +74,4 @@ func GofakeInit() {
 			return time, nil
 		},
 	})
-}
-
-// Читает файл model.json, возвращает его в виде структуры и []byte.
-func ReadModelFile() (models.Order, []byte) {
-	var E models.Order
-	content, err := os.ReadFile("test/model.json")
-	if err != nil {
-		slog.Error(err.Error())
-	}
-
-	err = json.Unmarshal(content, &E)
-	if err != nil {
-		slog.Error(err.Error())
-	}
-
-	return E, content
 }

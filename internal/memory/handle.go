@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/chnmk/order-info-l0/internal/database"
+	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
@@ -30,7 +30,7 @@ func (m *MemStore) HandleMessage(b []byte) {
 			return
 		}
 
-		err = database.DB.InsertOrder(m.currentkey, b, context.Background())
+		err = cfg.DB.InsertOrder(m.currentkey, b, context.Background())
 		if err != nil {
 			slog.Error("failed to add order: order already exists")
 			return

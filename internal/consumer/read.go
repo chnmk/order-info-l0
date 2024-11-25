@@ -5,7 +5,6 @@ import (
 	"log/slog"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
-	"github.com/chnmk/order-info-l0/internal/memory"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -32,7 +31,7 @@ func (c *KafkaConsumer) Read(ctx context.Context) {
 		}
 
 		slog.Info("=== handling new order ===")
-		memory.DATA.HandleMessage(m.Value)
+		cfg.Data.HandleMessage(m.Value)
 	}
 
 	if err := c.Reader.Close(); err != nil {

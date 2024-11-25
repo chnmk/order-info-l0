@@ -1,8 +1,15 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
 
-var PgxpoolUrl string
+	"github.com/chnmk/order-info-l0/internal/models"
+)
+
+var (
+	DB         models.Database
+	PgxpoolUrl string
+)
 
 func getDatabaseVars() {
 	PgxpoolUrl = getPgxpoolUrl()
