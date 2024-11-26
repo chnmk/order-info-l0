@@ -6,6 +6,10 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
+/*
+	Устанавливает переменные для пакета consumer.
+*/
+
 var (
 	KafkaInitNework        string
 	KafkaInitAddress       string
@@ -13,10 +17,10 @@ var (
 	KafkaInitPartition     int
 	KafkaReconnectAttempts int
 	KafkaReaderGoroutines  int
-	KafkaWriterGoroutines  int
 	KafkaReaderConfig      kafka.ReaderConfig
 )
 
+// Получает глобальные переменные для пакета consumer.
 func getConsumerVars() {
 	KafkaInitNework = Env.Get("KAFKA_NETWORK")
 	KafkaInitAddress = fmt.Sprintf("%s:%s", Env.Get("KAFKA_PROTOCOL"), Env.Get("KAFKA_PORT"))

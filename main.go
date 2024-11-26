@@ -41,7 +41,7 @@ func main() {
 	http.HandleFunc("/orders", transport.GetOrder)
 	http.HandleFunc("/", transport.DisplayPage)
 
-	err := http.ListenAndServe(fmt.Sprintf(":%s", cfg.Env.Get("SERVER_PORT")), nil)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", cfg.ServerPort), nil)
 	if err != nil {
 		panic(err)
 	}

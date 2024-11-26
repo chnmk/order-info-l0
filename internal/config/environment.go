@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Записывает стандартные значения переменных окружения, после чего вызывает функции для чтения самого окружение.
 func (e *EnvStorage) InitEnv() {
 	e.Env = make(map[string]string)
 	e.Env["POSTGRES_DB"] = "orders"
@@ -28,8 +29,15 @@ func (e *EnvStorage) InitEnv() {
 	e.Env["KAFKA_WRITE_EXAMPLES"] = "0"
 	e.Env["KAFKA_WRITER_GOROUTINES"] = "1"
 	e.Env["SERVER_PORT"] = "3000"
+
+	Env.ReadEnv()
+	getConsumerVars()
+	getDatabaseVars()
+	getTestingVars()
+	getTransportVars()
 }
 
+// Читает переменные окружения и записывает их в мапу.
 func (e *EnvStorage) ReadEnv() {
 	err := godotenv.Load()
 	if err != nil {
@@ -50,6 +58,7 @@ func (e *EnvStorage) ReadEnv() {
 	}
 }
 
+// Получает значение из мапы переменных.
 func (e *EnvStorage) Get(key string) string {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -57,6 +66,7 @@ func (e *EnvStorage) Get(key string) string {
 	return e.Env[key]
 }
 
+// Конвертирует строковую переменную окружения s из мапы в тип int.
 func envToInt(s string) int {
 	att := Env.Get(s)
 
