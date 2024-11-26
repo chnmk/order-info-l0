@@ -18,7 +18,7 @@ type Order struct {
 	Customer_id        string   `json:"customer_id"`
 	Delivery_service   string   `json:"delivery_service" fake:"{word}"`
 	Shardkey           string   `json:"shardkey" fake:"{digit}"`
-	Sm_id              int32    `json:"sm_id" fake:"{number: 1, 1000}"`
+	Sm_id              int      `json:"sm_id" fake:"{number: 1, 1000}"`
 	Date_created       string   `json:"date_created" fake:"{wbtime}"`
 	Oof_shard          string   `json:"oof_shard" fake:"{digit}"`
 }
@@ -38,26 +38,26 @@ type Payment struct {
 	Request_id    string `json:"request_id"`
 	Currency      string `json:"currency" fake:"{currencyshort}"`
 	Provider      string `json:"provider" fake:"{word}"`
-	Amount        int32  `json:"amount" fake:"{number: 1, 50000}"`
-	Payment_dt    int32  `json:"payment_dt"`
+	Amount        int    `json:"amount" fake:"{number: 1, 50000}"`
+	Payment_dt    int    `json:"payment_dt"`
 	Bank          string `json:"bank" fake:"{word}"`
-	Delivery_cost int32  `json:"delivery_cost" fake:"{number: 1, 5000}"`
-	Goods_total   int32  `json:"goods_total" fake:"{number: 1, 100000}"`
-	Custom_fee    int32  `json:"custom_fee" fake:"{number: 0, 1000}"`
+	Delivery_cost int    `json:"delivery_cost" fake:"{number: 1, 5000}"`
+	Goods_total   int    `json:"goods_total" fake:"{number: 1, 100000}"`
+	Custom_fee    int    `json:"custom_fee" fake:"{number: 0, 1000}"`
 }
 
 type Item struct {
-	Chrt_id      int32  `json:"chrt_id" fake:"{number: 1, 10000000}"`
+	Chrt_id      int    `json:"chrt_id" fake:"{number: 1, 10000000}"`
 	Track_number string `json:"track_number"`
-	Price        int32  `json:"price" fake:"{number: 1, 5000}"`
+	Price        int    `json:"price" fake:"{number: 1, 5000}"`
 	Rid          string `json:"rid"`
 	Name         string `json:"name" fake:"{productname}"`
-	Sale         int32  `json:"sale" fake:"{number: 0, 1000}"`
+	Sale         int    `json:"sale" fake:"{number: 0, 1000}"`
 	Size         string `json:"size" fake:"{digit}"`
-	Total_price  int32  `json:"total_price" fake:"{number: 10, 5000}"`
-	Nm_id        int32  `json:"nm_id" fake:"{number: 1, 10000000}"`
+	Total_price  int    `json:"total_price" fake:"{number: 10, 5000}"`
+	Nm_id        int    `json:"nm_id" fake:"{number: 1, 10000000}"`
 	Brand        string `json:"brand" fake:"{word}"`
-	Status       int32  `json:"status" fake:"{number: 100, 999}"`
+	Status       int    `json:"status" fake:"{number: 100, 999}"`
 }
 
 // Читает файл model.json, возвращает его в виде структуры и []byte.
