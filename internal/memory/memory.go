@@ -27,6 +27,8 @@ type MemStore struct {
 func NewStorage(m models.Storage) models.Storage {
 	once.Do(func() {
 		m = &MemStore{}
+
+		m.RestoreData()
 	})
 
 	return m

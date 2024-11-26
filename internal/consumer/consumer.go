@@ -11,6 +11,6 @@ type KafkaConsumer struct {
 	Reader *kafka.Reader
 }
 
-func NewConsumer() models.Consumer {
+func newConsumer() models.Consumer {
 	return &KafkaConsumer{}
 }

@@ -2,9 +2,6 @@ package config
 
 import (
 	"fmt"
-	"log/slog"
-	"os"
-	"strconv"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -15,6 +12,8 @@ var (
 	KafkaInitTopic         string
 	KafkaInitPartition     int
 	KafkaReconnectAttempts int
+	KafkaReaderGoroutines  int
+	KafkaWriterGoroutines  int
 	KafkaReaderConfig      kafka.ReaderConfig
 )
 
@@ -23,50 +22,13 @@ func getConsumerVars() {
 	KafkaInitAddress = fmt.Sprintf("%s:%s", Env.Get("KAFKA_PROTOCOL"), Env.Get("KAFKA_PORT"))
 	KafkaInitTopic = Env.Get("KAFKA_TOPIC")
 	KafkaInitPartition = 0
-	KafkaReconnectAttempts = getKafkaReconnectAttempts()
-	KafkaReaderConfig = getKafkaReaderConfig()
-}
-
-func getKafkaReconnectAttempts() int {
-	att := Env.Get("KAFKA_RECONNECT_ATTEMPTS")
-
-	result, err := strconv.Atoi(att)
-	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
-	}
-
-	return result
-}
-
-func getKafkaReaderConfig() kafka.ReaderConfig {
-	maxBytes, err := strconv.Atoi(Env.Get("KAFKA_MAX_BYTES"))
-	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
-	}
-
-	att, err := strconv.Atoi(Env.Get("KAFKA_RECONNECT_ATTEMPTS"))
-	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
-	}
-
-	// TODO: видимо стоит удалить это и соответствующую переменную раз у нас ручные коммиты.
-	/*
-		interv, err := strconv.Atoi(Env.Get("KAFKA_COMMIT_INVERVAL_SECONDS"))
-		if err != nil {
-			slog.Error(err.Error())
-			os.Exit(1)
-		}
-	*/
-
-	return kafka.ReaderConfig{
+	KafkaReconnectAttempts = envToInt("KAFKA_RECONNECT_ATTEMPTS")
+	KafkaReaderGoroutines = envToInt("KAFKA_READER_GOROUTINES")
+	KafkaReaderConfig = kafka.ReaderConfig{
 		Brokers:     []string{fmt.Sprintf("%s:%s", Env.Get("KAFKA_PROTOCOL"), Env.Get("KAFKA_PORT"))},
 		GroupID:     Env.Get("KAFKA_GROUP_ID"),
 		Topic:       Env.Get("KAFKA_TOPIC"),
-		MaxBytes:    maxBytes,
-		MaxAttempts: att,
-		// CommitInterval: time.Duration(interv) * time.Second,
+		MaxBytes:    envToInt("KAFKA_MAX_BYTES"),
+		MaxAttempts: envToInt("KAFKA_RECONNECT_ATTEMPTS"),
 	}
 }

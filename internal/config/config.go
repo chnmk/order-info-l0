@@ -1,32 +1,26 @@
 package config
 
-import "sync"
+import (
+	"sync"
 
-// TODO: добавить разные структуры конфигов, например cfg.Kafka
-var (
-	Env  Config
-	once sync.Once
+	"github.com/chnmk/order-info-l0/internal/models"
 )
 
-type Config interface {
-	initEnv()
-	readEnv()
-	Get(string) string
-}
+var (
+	Env  models.Config
+	once sync.Once
+)
 
 type EnvStorage struct {
 	mu  sync.Mutex
 	Env map[string]string
 }
 
-func (e *EnvStorage) init() {
-}
-
-func NewConfig() Config {
+func NewConfig() models.Config {
 	once.Do(func() {
 		Env = &EnvStorage{}
-		Env.initEnv()
-		Env.readEnv()
+		Env.InitEnv()
+		Env.ReadEnv()
 		getConsumerVars()
 		getDatabaseVars()
 		getTestVars()

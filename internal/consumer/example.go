@@ -17,7 +17,7 @@ import (
 //
 // Данные не претендуют на реалистичность (не совпадают цены, места и так далее), но это и не рандомные символы.
 // Такой вариант приемлем, поскольку по ТЗ эти данные пока никак не обрабатываются, но отобразить их нужно.
-func PublishExampleData() {
+func publishExampleData() {
 	slog.Info("creating new kafka writer for fake data...")
 
 	// Возможно эта функция будет вызываться много раз в горутинах, так что лучше не получать каждый раз переменные окружения по-новой.
@@ -57,7 +57,7 @@ func PublishExampleData() {
 	slog.Info("fake data generation stopped")
 }
 
-func GofakeInit() {
+func goFakeInit() {
 	// Пример кастомной функции для генерации приближенных к реальности данных.
 	gofakeit.AddFuncLookup("wbdate", gofakeit.Info{
 		Category:    "custom",

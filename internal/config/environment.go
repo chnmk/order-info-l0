@@ -3,11 +3,12 @@ package config
 import (
 	"log/slog"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
 
-func (e *EnvStorage) initEnv() {
+func (e *EnvStorage) InitEnv() {
 	e.Env = make(map[string]string)
 	e.Env["POSTGRES_DB"] = "orders"
 	e.Env["POSTGRES_USER"] = "user"
@@ -23,12 +24,13 @@ func (e *EnvStorage) initEnv() {
 	e.Env["KAFKA_GROUP_ID"] = "go-orders-1"
 	e.Env["KAFKA_MAX_BYTES"] = "100000" // 100kb
 	e.Env["KAFKA_COMMIT_INVERVAL_SECONDS"] = "1"
-	e.Env["CONSUMER_GOROUTINES"] = "1"
-	e.Env["CONSUMER_PUBLISH_EXAMPLES"] = "0"
+	e.Env["KAFKA_READER_GOROUTINES"] = "1"
+	e.Env["KAFKA_WRITE_EXAMPLES"] = "0"
+	e.Env["KAFKA_WRITER_GOROUTINES"] = "1"
 	e.Env["SERVER_PORT"] = "3000"
 }
 
-func (e *EnvStorage) readEnv() {
+func (e *EnvStorage) ReadEnv() {
 	err := godotenv.Load()
 	if err != nil {
 		slog.Info("Warning: .env file not found")
@@ -53,4 +55,16 @@ func (e *EnvStorage) Get(key string) string {
 	defer e.mu.Unlock()
 
 	return e.Env[key]
+}
+
+func envToInt(s string) int {
+	att := Env.Get(s)
+
+	result, err := strconv.Atoi(att)
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+
+	return result
 }
