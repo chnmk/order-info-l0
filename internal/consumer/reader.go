@@ -24,7 +24,8 @@ func (c *KafkaConsumer) Read(ctx context.Context) {
 	slog.Info("reader created, reading messages...")
 
 	for {
-		m, err := c.Reader.ReadMessage(ctx)
+		// Чтобы не терять данные отдельно вызывает FetchMessage и, после записи в БД, CommitMessages.
+		m, err := c.Reader.FetchMessage(ctx)
 		if err != nil {
 			slog.Error(err.Error())
 			break
@@ -32,6 +33,11 @@ func (c *KafkaConsumer) Read(ctx context.Context) {
 
 		slog.Info("=== handling new order ===")
 		cfg.Data.HandleMessage(m.Value)
+
+		// TODO: мы в основной горутине делаем то что стоило бы делать асинхронно?
+		if err := c.Reader.CommitMessages(ctx, m); err != nil {
+			slog.Error(err.Error())
+		}
 	}
 
 	if err := c.Reader.Close(); err != nil {

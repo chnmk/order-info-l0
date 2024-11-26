@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -53,18 +52,21 @@ func getKafkaReaderConfig() kafka.ReaderConfig {
 		os.Exit(1)
 	}
 
-	interv, err := strconv.Atoi(Env.Get("KAFKA_COMMIT_INVERVAL_SECONDS"))
-	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
-	}
+	// TODO: видимо стоит удалить это и соответствующую переменную раз у нас ручные коммиты.
+	/*
+		interv, err := strconv.Atoi(Env.Get("KAFKA_COMMIT_INVERVAL_SECONDS"))
+		if err != nil {
+			slog.Error(err.Error())
+			os.Exit(1)
+		}
+	*/
 
 	return kafka.ReaderConfig{
-		Brokers:        []string{fmt.Sprintf("%s:%s", Env.Get("KAFKA_PROTOCOL"), Env.Get("KAFKA_PORT"))},
-		GroupID:        Env.Get("KAFKA_GROUP_ID"),
-		Topic:          Env.Get("KAFKA_TOPIC"),
-		MaxBytes:       maxBytes,
-		MaxAttempts:    att,
-		CommitInterval: time.Duration(interv) * time.Second,
+		Brokers:     []string{fmt.Sprintf("%s:%s", Env.Get("KAFKA_PROTOCOL"), Env.Get("KAFKA_PORT"))},
+		GroupID:     Env.Get("KAFKA_GROUP_ID"),
+		Topic:       Env.Get("KAFKA_TOPIC"),
+		MaxBytes:    maxBytes,
+		MaxAttempts: att,
+		// CommitInterval: time.Duration(interv) * time.Second,
 	}
 }
