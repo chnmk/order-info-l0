@@ -9,7 +9,7 @@ var q_orders_ids = "SELECT id FROM orders"
 
 // Возвращает все id (не order_uid) заказов из таблицы orders.
 func (db *PostgresDB) GetOrdersIDs() []int {
-	rows, err := db.DB.Query(context.Background(), q_orders_ids)
+	rows, err := db.Conn.Query(context.Background(), q_orders_ids)
 	if err != nil {
 		slog.Error("QueryRow failed: " + err.Error())
 	}

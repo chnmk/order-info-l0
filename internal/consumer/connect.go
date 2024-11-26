@@ -10,7 +10,7 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-func Init() {
+func Connect() {
 	var conn *kafka.Conn
 	var err error
 

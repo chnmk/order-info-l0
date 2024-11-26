@@ -19,7 +19,7 @@ func (db *PostgresDB) InsertOrder(key int, m []byte, ctx context.Context) error 
 	slog.Info("inserting order to database...")
 
 	args := pgx.NamedArgs{"jsonorder": m}
-	row := db.DB.QueryRow(context.Background(), q_insert_json, args)
+	row := db.Conn.QueryRow(context.Background(), q_insert_json, args)
 
 	var order_id int
 	err := row.Scan(&order_id)

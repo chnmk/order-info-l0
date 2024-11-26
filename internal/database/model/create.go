@@ -91,7 +91,7 @@ func (db *PostgresDB) CreateTables() {
 	queries := []string{createOrders, createDelivery, createPayments, createItems, createItemsbind}
 
 	for _, q := range queries {
-		_, err := db.DB.Exec(context.Background(), q)
+		_, err := db.Conn.Exec(context.Background(), q)
 		if err != nil {
 			slog.Error("Failed to create table " + err.Error())
 		}

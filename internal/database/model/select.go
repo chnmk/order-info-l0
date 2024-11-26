@@ -54,7 +54,7 @@ func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 	args := pgx.NamedArgs{"id": id}
 
 	// Получение данных из orders, delivery, payments. Порядок в Scan должен соответствовать порядку полей в запросе.
-	err := db.DB.QueryRow(context.Background(), q_orders, args).Scan(
+	err := db.Conn.QueryRow(context.Background(), q_orders, args).Scan(
 		&key,
 		&order.Order_uid,
 		&order.Track_number,
@@ -73,7 +73,7 @@ func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 		slog.Error("QueryRow failed: " + err.Error())
 	}
 
-	err = db.DB.QueryRow(context.Background(), q_delivery, args).Scan(
+	err = db.Conn.QueryRow(context.Background(), q_delivery, args).Scan(
 		&order.Delivery.Name,
 		&order.Delivery.Phone,
 		&order.Delivery.Zip,
@@ -87,7 +87,7 @@ func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 		slog.Error("QueryRow failed: " + err.Error())
 	}
 
-	err = db.DB.QueryRow(context.Background(), q_payments, args).Scan(
+	err = db.Conn.QueryRow(context.Background(), q_payments, args).Scan(
 		&order.Payment.Transaction,
 		&order.Payment.Request_id,
 		&order.Payment.Currency,
@@ -105,7 +105,7 @@ func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 	}
 
 	// Получение данных из items. Порядок в Scan должен соответствовать порядку полей в запросе.
-	rows, err := db.DB.Query(context.Background(), q_items, args)
+	rows, err := db.Conn.Query(context.Background(), q_items, args)
 	if err != nil {
 		slog.Error("QueryRow failed: " + err.Error())
 	}

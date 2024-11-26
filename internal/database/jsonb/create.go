@@ -15,7 +15,7 @@ var createJSONOrders = `CREATE TABLE IF NOT EXISTS jsonorders (
 //
 // Не использует индексы из-за потенциально значительно большего количества операций записи чем чтения.
 func (db *PostgresDB) CreateTables() {
-	_, err := db.DB.Exec(context.Background(), createJSONOrders)
+	_, err := db.Conn.Exec(context.Background(), createJSONOrders)
 	if err != nil {
 		slog.Error("Failed to create table " + err.Error())
 	}

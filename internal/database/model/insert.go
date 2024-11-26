@@ -65,7 +65,7 @@ func (db *PostgresDB) InsertOrder(key int, m []byte, ctx context.Context) error 
 
 	slog.Info("starting insert transaction...")
 
-	tx, err := db.DB.Begin(ctx)
+	tx, err := db.Conn.Begin(ctx)
 	if err != nil {
 		slog.Error("Failed to begin transaction: " + err.Error())
 		return nil

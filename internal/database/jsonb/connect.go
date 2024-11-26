@@ -9,15 +9,15 @@ import (
 )
 
 type PostgresDB struct {
-	DB *pgxpool.Pool
+	Conn *pgxpool.Pool
 }
 
 func (db *PostgresDB) Close() {
-	db.DB.Close()
+	db.Conn.Close()
 }
 
 func (db *PostgresDB) Ping() {
-	err := db.DB.Ping(context.Background())
+	err := db.Conn.Ping(context.Background())
 	if err != nil {
 		slog.Error("Database ping failed: " + err.Error())
 		os.Exit(1)

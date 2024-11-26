@@ -34,16 +34,13 @@ func main() {
 	cfg.DB = database.NewDB(&pgxpool.Pool{}, ctx_db)
 	defer cfg.DB.Close()
 
-	cfg.DB.Ping()
-	cfg.DB.CreateTables()
-
 	// Инициализация хранилища и восстановление данных из БД.
 	cfg.Data = memory.NewStorage(cfg.Data)
 	cfg.Data.RestoreData()
 
 	// Инициализация подключения к брокеру сообщений и создание горутин.
 	ctx_consumers := context.Background()
-	consumer.Init()
+	consumer.Connect()
 
 	routines, err := strconv.Atoi(cfg.Env.Get("CONSUMER_GOROUTINES"))
 	if err != nil {

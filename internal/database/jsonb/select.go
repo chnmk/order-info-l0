@@ -25,7 +25,7 @@ func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 	var orderjson []byte
 
 	args := pgx.NamedArgs{"id": id}
-	err := db.DB.QueryRow(context.Background(), q_jsonorders, args).Scan(&key, &orderjson)
+	err := db.Conn.QueryRow(context.Background(), q_jsonorders, args).Scan(&key, &orderjson)
 	if err != nil {
 		slog.Error("QueryRow failed: " + err.Error())
 	}
