@@ -1,21 +1,16 @@
 package consumer
 
 import (
-	"context"
-
+	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/segmentio/kafka-go"
 )
 
-var Cons Consumer
-
-type Consumer interface {
-	Read(context.Context)
-}
+var Cons models.Consumer
 
 type KafkaConsumer struct {
 	Reader *kafka.Reader
 }
 
-func NewConsumer() Consumer {
+func NewConsumer() models.Consumer {
 	return &KafkaConsumer{}
 }

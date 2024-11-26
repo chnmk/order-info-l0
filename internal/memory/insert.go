@@ -2,12 +2,10 @@ package memory
 
 import (
 	"log/slog"
-
-	"github.com/chnmk/order-info-l0/internal/models"
 )
 
 // Добавляет заказ value в память.
-func (m *MemStore) AddOrder(value models.Order) {
+func (m *MemStore) AddOrder(value []byte) {
 	slog.Info("adding order to memory storage...")
 
 	m.mu.Lock()

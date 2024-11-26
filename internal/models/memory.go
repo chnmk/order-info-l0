@@ -1,9 +1,16 @@
 package models
 
+import "time"
+
 type Storage interface {
-	Init()
 	HandleMessage([]byte)
-	AddOrder(Order)
+	AddOrder([]byte)
 	Read(int) Order
 	RestoreData()
+}
+
+type OrderStorage struct {
+	UID     string
+	Order   []byte
+	Expires time.Time
 }
