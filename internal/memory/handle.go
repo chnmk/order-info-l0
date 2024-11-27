@@ -35,7 +35,6 @@ func (m *MemStore) HandleMessage(b []byte) {
 
 	orderStruct := m.AddOrder(orderData.Order_uid, orderData.Date_created, b)
 
-	// TODO: хендлер БД будет отдельно жить?
 	cfg.DB.InsertOrder(orderStruct, context.TODO())
 
 	slog.Info("message handling finished")

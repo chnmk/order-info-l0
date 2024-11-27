@@ -10,22 +10,22 @@ import (
 
 // Строка для добавления данных в таблицу orders.
 const q_insert = `
-	INSERT INTO orders(id, uid, expires, order)
-	VALUES (@id, @uid, @expires, @order)
+	INSERT INTO orders(id, uid, created, order)
+	VALUES (@id, @uid, @created, @order)
 	RETURNING id
 `
 
 // Пробует добавить заказ в БД, выводит ошибку если заказ с таким id уже существует.
-func (db *PostgresDB) InsertOrder(id int, order models.OrderStorage, ctx context.Context) {
+func (db *PostgresDB) InsertOrder(order models.OrderStorage, ctx context.Context) {
 	slog.Info(
 		"inserting order to database...",
-		"id", id,
+		"id", order.ID,
 	)
 
 	args := pgx.NamedArgs{
-		"id":      id,
+		"id":      order.ID,
 		"uid":     order.UID,
-		"expires": order.Expires,
+		"created": order.Date_created,
 		"order":   order.Order,
 	}
 	row := db.Conn.QueryRow(context.TODO(), q_insert, args)
@@ -36,13 +36,13 @@ func (db *PostgresDB) InsertOrder(id int, order models.OrderStorage, ctx context
 		slog.Error(
 			"failed to insert data",
 			"err", err.Error,
-			"id", id,
+			"id", order.ID,
 		)
 		return
 	}
 
 	slog.Info(
 		"finished inserting order to database",
-		"id", id,
+		"id", order.ID,
 	)
 }

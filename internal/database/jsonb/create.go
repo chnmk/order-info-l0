@@ -10,8 +10,8 @@ import (
 const q_create = `
 	CREATE TABLE IF NOT EXISTS orders (
 	id INTEGER PRIMARY KEY, 
-	uid VARCHAR(64),
-	expires INTEGER,
+	uid VARCHAR(32),
+	created VARCHAR(32),
 	order JSONB
 	)`
 

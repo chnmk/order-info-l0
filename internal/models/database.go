@@ -10,5 +10,5 @@ type Database interface {
 	RestoreData() []OrderStorage
 	SelectOrderById(int) (int, Order)
 	SelectOrderByUID(string) (int, Order)
-	InsertOrder(int, OrderStorage, context.Context)
+	InsertOrder(OrderStorage, context.Context)
 }

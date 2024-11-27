@@ -33,7 +33,7 @@ func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 	args := pgx.NamedArgs{"id": id}
 	err := db.Conn.QueryRow(context.Background(), q_select_by_id, args).Scan(&key, &orderjson)
 	if err != nil {
-		slog.Error("queryRow failed: " + err.Error())
+		slog.Error("query failed: " + err.Error())
 	}
 
 	err = json.Unmarshal(orderjson, &order)
@@ -54,7 +54,7 @@ func (db *PostgresDB) SelectOrderByUID(uid string) (int, models.Order) {
 	args := pgx.NamedArgs{"id": uid}
 	err := db.Conn.QueryRow(context.Background(), q_select_by_uid, args).Scan(&key, &orderjson)
 	if err != nil {
-		slog.Error("queryRow failed: " + err.Error())
+		slog.Error("query failed: " + err.Error())
 	}
 
 	err = json.Unmarshal(orderjson, &order)
