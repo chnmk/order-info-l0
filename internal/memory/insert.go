@@ -2,22 +2,28 @@ package memory
 
 import (
 	"log/slog"
+
+	"github.com/chnmk/order-info-l0/internal/models"
 )
 
-// Добавляет заказ value в память.
-func (m *MemStore) AddOrder(value []byte) {
+// Добавляет данные о заказе в память и возвращает сам заказ в том виде, в котором он хранится в памяти.
+func (m *MemStore) AddOrder(order_uid string, date_created string, value []byte) models.OrderStorage {
 	slog.Info("adding order to memory storage...")
+
+	var order models.OrderStorage
+
+	order.UID = order_uid
+	order.Expires = date_created
+	order.Order = value
 
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	_, ok := m.orders[m.currentkey]
-	if ok {
-		slog.Error("Failed to add order: id already exists")
-		return
-	}
+	m.maxId++
+	order.ID = m.maxId
+	m.orders = append(m.orders, order)
 
-	m.orders[m.currentkey] = value
 	slog.Info("finished adding order to memory storage")
-	m.currentkey++
+
+	return order
 }

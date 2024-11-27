@@ -8,7 +8,8 @@ type Storage interface {
 }
 
 type OrderStorage struct {
+	ID      int
 	UID     string
-	Expires int // Дата удаления заказа в формате epoch.
+	Expires string // Дата удаления заказа в формате epoch.
 	Order   []byte
 }

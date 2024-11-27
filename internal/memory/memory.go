@@ -22,6 +22,7 @@ var once sync.Once
 type MemStore struct {
 	mu     sync.Mutex
 	orders []models.OrderStorage
+	maxId  int
 }
 
 func NewStorage(m models.Storage) models.Storage {

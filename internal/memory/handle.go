@@ -9,34 +9,34 @@ import (
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
-// Обрабатывает сообщение в горутине.
+// Обрабатывает сообщение в горутине. TODO: переписать этот комментарий.
 func (m *MemStore) HandleMessage(b []byte) {
-	// TODO: подумать над горутинами, плюс может унмаршалер отдельно будет жить
-	var order models.Order
+	slog.Error("handling message...")
 
-	// TODO: валидировать будем отдельно в горутине
-	err := json.Unmarshal(b, &order)
+	var orderData models.Order
+
+	err := json.Unmarshal(b, &orderData)
 	if err != nil {
-		slog.Info("failed to unmarshal, skipping")
+		slog.Error(
+			"failed to unmarshal message",
+			"err", err,
+		)
 		return
 	}
 
-	// TODO: валидировать будем отдельно в горутине
-	if ok := ValidateMsg(order); !ok {
-		slog.Info("failed to validate, skipping")
+	err = ValidateMsg(orderData)
+	if err != nil {
+		slog.Error(
+			"failed to validate message",
+			"err", err,
+		)
 		return
 	}
+
+	orderStruct := m.AddOrder(orderData.Order_uid, orderData.Date_created, b)
 
 	// TODO: хендлер БД будет отдельно жить?
-	err = cfg.DB.InsertOrder(len(m.orders), b, context.Background())
-	if err != nil {
-		slog.Error("failed to add order: order already exists")
-		return
-	}
+	cfg.DB.InsertOrder(orderStruct, context.TODO())
 
-	// Это очень странно если у нас в память добавляется ПОСЛЕ бд
-	// Если ты хочешь проверять повторный заказ... Нафига?
-	m.AddOrder(b)
-
-	slog.Info("order handling finished")
+	slog.Info("message handling finished")
 }
