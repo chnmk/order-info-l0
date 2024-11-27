@@ -21,11 +21,13 @@ var once sync.Once
 // При "model" заказ делится на таблицы с отдельным полем под каждое значение.
 // При любом другом значении (значение по умолчанию) заказ записывается в поле типа JSONB.
 func NewDB(db models.Database, ctx context.Context) models.Database {
+	slog.Info("creating new database connection pool...")
+
 	once.Do(func() {
 		var err error
 		conn, err := pgxpool.New(ctx, cfg.PgxpoolUrl)
 		if err != nil {
-			slog.Error("Unable to connect to database: " + err.Error())
+			slog.Error("unable to connect to database: " + err.Error())
 		}
 
 		if cfg.Env.Get("DB_INTERFACE_MODE") == "model" {
@@ -37,6 +39,8 @@ func NewDB(db models.Database, ctx context.Context) models.Database {
 		db.Ping()
 		db.CreateTables()
 	})
+
+	slog.Info("database successfully initialized")
 
 	return db
 

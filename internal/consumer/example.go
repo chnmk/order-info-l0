@@ -18,9 +18,10 @@ import (
 // Данные не претендуют на реалистичность (не совпадают цены, места и так далее), но это и не рандомные символы.
 // Такой вариант приемлем, поскольку по ТЗ эти данные пока никак не обрабатываются, но отобразить их нужно.
 func publishExampleData() {
-	slog.Info("creating new kafka writer for fake data...")
+	slog.Info("creating new kafka writer...")
 
-	// Возможно эта функция будет вызываться много раз в горутинах, так что лучше не получать каждый раз переменные окружения по-новой.
+	// Возможно эта функция будет одновременно много раз вызываться в горутинах,
+	// так что лучше не получать каждый раз переменные окружения по-новой.
 	w := &kafka.Writer{
 		Addr:  cfg.KafkaWriterAddr,
 		Topic: cfg.KafkaWriterTopic,
@@ -28,10 +29,11 @@ func publishExampleData() {
 
 	slog.Info("generating fake data...")
 
-	// Запись сообщений работает 1000 секунд. TODO: правильнее отменять через контекст?
+	// Запись сообщений работает 1000 секунд. TODO: правильнее отменять через контекст? Через канал?
 	for i := 0; i < 1000; i++ {
 		var m models.Order
 
+		// TODO: вынести в отдельную функцию для тестов.
 		gofakeit.Struct(&m)
 		data, err := json.Marshal(m)
 		if err != nil {
@@ -42,7 +44,7 @@ func publishExampleData() {
 			kafka.Message{Value: data},
 		)
 		if err != nil {
-			slog.Error("Failed to write messages: " + err.Error())
+			slog.Error("failed to write messages: " + err.Error())
 		} else {
 			slog.Info("writing successful!")
 		}
@@ -51,14 +53,14 @@ func publishExampleData() {
 	}
 
 	if err := w.Close(); err != nil {
-		slog.Error("Failed to close writer: " + err.Error())
+		slog.Error("failed to close writer: " + err.Error())
 	}
 
 	slog.Info("fake data generation stopped")
 }
 
+// Пример кастомной функции для генерации приближенных к реальности данных.
 func goFakeInit() {
-	// Пример кастомной функции для генерации приближенных к реальности данных.
 	gofakeit.AddFuncLookup("wbdate", gofakeit.Info{
 		Category:    "custom",
 		Description: "random date string",

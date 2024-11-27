@@ -10,10 +10,13 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
+// Проверяет подключение к Kafka, пытается подключиться указанное количество раз.
+// Затем создает горутины для чтения сообщений и, при необходимости, для записи сгенерированных данных.
 func Connect() {
 	var conn *kafka.Conn
 	var err error
 
+	// Пытается подключиться к Kafka.
 	for i := 0; i < cfg.KafkaReconnectAttempts; i++ {
 		conn, err = kafka.DialLeader(context.Background(),
 			cfg.KafkaInitNework,
@@ -38,6 +41,13 @@ func Connect() {
 
 	conn.Close()
 
+	// Создает горутины для чтения сообщений.
+	// TODO: посмотреть, увеличится ли скорость чтения от наличия нескольких горутин.
+	for i := 0; i < cfg.KafkaReaderGoroutines; i++ {
+		go newReader().Read(context.TODO())
+	}
+
+	// Создает горутины для записи сгенерированных сообщений.
 	if cfg.Env.Get("KAFKA_WRITE_EXAMPLES") == "1" {
 		goFakeInit()
 
@@ -45,9 +55,5 @@ func Connect() {
 			go publishExampleData()
 		}
 
-	}
-
-	for i := 0; i < cfg.KafkaReaderGoroutines; i++ {
-		go newConsumer().Read(context.TODO())
 	}
 }

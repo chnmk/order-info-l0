@@ -5,23 +5,13 @@ import (
 	"log/slog"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
-	"github.com/segmentio/kafka-go"
 )
 
-/*
-TODO: написать объяснительную.
-
-Consumer group используются по нескольким причинам:
-	- Возможность напрямую использовать коммиты и не перечитывать старые сообщения.
-	- Потенциальная поддержка многопоточности.
-*/
-
-func (c *KafkaConsumer) Read(ctx context.Context) {
-	slog.Info("creating new kafka reader...")
-
-	c.Reader = kafka.NewReader(cfg.KafkaReaderConfig)
-
-	slog.Info("reader created, reading messages...")
+// Читает сообщения из Kafka.
+//
+// Использован самый базовый функционал, логика обработки сообщений, включая коммиты, находится в пакете memory.
+func (c *KafkaReader) Read(ctx context.Context) {
+	slog.Info("reading messages from kafka...")
 
 	for {
 		// Чтобы не терять данные отдельно вызывает FetchMessage и, после записи в БД, CommitMessages.
@@ -38,7 +28,7 @@ func (c *KafkaConsumer) Read(ctx context.Context) {
 		// По-хорошему надо как-то через каналы это делать...
 		go cfg.Data.HandleMessage(m.Value)
 
-		// TODO: мы в основной горутине делаем то что стоило бы делать асинхронно?
+		// TODO: вынести это отсюда.
 		if err := c.Reader.CommitMessages(ctx, m); err != nil {
 			slog.Error(err.Error())
 		}
