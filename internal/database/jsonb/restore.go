@@ -3,32 +3,51 @@ package db_jsonb
 import (
 	"context"
 	"log/slog"
+	"os"
+
+	"github.com/chnmk/order-info-l0/internal/models"
 )
 
-var q_jsonorders_ids = "SELECT id FROM jsonorders"
+const q_restore = `
+	SELECT * FROM orders
+`
 
-// Возвращает все id (не order_uid) заказов из таблицы orders.
-func (db *PostgresDB) GetOrdersIDs() []int {
-	rows, err := db.Conn.Query(context.Background(), q_jsonorders_ids)
+// Пытается получить все данные из БД. В случае неудачи завершает работу сервиса.
+func (db *PostgresDB) RestoreData() []models.OrderStorage {
+	slog.Info("restoring data from database...")
+
+	var result []models.OrderStorage
+	rows, err := db.Conn.Query(context.TODO(), q_restore)
 	if err != nil {
-		slog.Error("QueryRow failed: " + err.Error())
+		slog.Error(
+			"failed to restore data",
+			"err", err,
+		)
+		os.Exit(1)
 	}
 
 	defer rows.Close()
 
-	var ids []int
 	for rows.Next() {
-		var id int
-		err = rows.Scan(&id)
+		var order models.OrderStorage
+		err = rows.Scan(&order)
 		if err != nil {
-			slog.Error("QueryRow failed: " + err.Error())
+			slog.Error(
+				"failed to restore data",
+				"err", err,
+			)
+			os.Exit(1)
 		}
-		ids = append(ids, id)
+		result = append(result, order)
 	}
 
 	if rows.Err() != nil {
-		slog.Error("QueryRow failed: " + err.Error())
+		slog.Error(
+			"failed to restore data",
+			"err", err,
+		)
+		os.Exit(1)
 	}
 
-	return ids
+	return result
 }

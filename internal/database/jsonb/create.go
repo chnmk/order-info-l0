@@ -3,20 +3,25 @@ package db_jsonb
 import (
 	"context"
 	"log/slog"
+	"os"
 )
 
 // Строка для создания таблицы.
-var createJSONOrders = `CREATE TABLE IF NOT EXISTS jsonorders (
-	id serial PRIMARY KEY, 
-	jsonorder JSONB
+const q_create = `
+	CREATE TABLE IF NOT EXISTS orders (
+	id INTEGER PRIMARY KEY, 
+	uid VARCHAR(64),
+	expires INTEGER,
+	order JSONB
 	)`
 
 // Создаёт отсутствующие таблицы в базе данных.
 //
 // Не использует индексы из-за потенциально значительно большего количества операций записи чем чтения.
 func (db *PostgresDB) CreateTables() {
-	_, err := db.Conn.Exec(context.Background(), createJSONOrders)
+	_, err := db.Conn.Exec(context.TODO(), q_create)
 	if err != nil {
-		slog.Error("Failed to create table " + err.Error())
+		slog.Error("failed to create tables: " + err.Error())
+		os.Exit(1)
 	}
 }

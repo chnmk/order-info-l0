@@ -12,29 +12,56 @@ import (
 // Строка для получения данных из таблицы orders.
 //
 // Не получает данные из таблиц delivery, payments и items.
-var q_jsonorders = `
+var q_select_by_id = `
 	SELECT *
-	FROM jsonorders 
+	FROM orders 
 	WHERE id = @id
 `
 
-// Возвращает один заказ из базы данных по его order_uid.
+var q_select_by_uid = `
+	SELECT *
+	FROM orders 
+	WHERE uid = @uid
+`
+
+// Возвращает один заказ из базы данных по его id (положение в массиве в кэше).
 func (db *PostgresDB) SelectOrderById(id int) (int, models.Order) {
 	var key int
 	var order models.Order
 	var orderjson []byte
 
 	args := pgx.NamedArgs{"id": id}
-	err := db.Conn.QueryRow(context.Background(), q_jsonorders, args).Scan(&key, &orderjson)
+	err := db.Conn.QueryRow(context.Background(), q_select_by_id, args).Scan(&key, &orderjson)
 	if err != nil {
-		slog.Error("QueryRow failed: " + err.Error())
+		slog.Error("queryRow failed: " + err.Error())
 	}
 
 	err = json.Unmarshal(orderjson, &order)
 	if err != nil {
-		slog.Error("Unmarshalling failed: " + err.Error())
+		slog.Error("unmarshalling failed: " + err.Error())
 	}
 
-	slog.Info("SelectOrderById: success")
+	slog.Info("order successfully selected from database")
+	return key, order
+}
+
+// Возвращает один заказ из базы данных по его order_uid.
+func (db *PostgresDB) SelectOrderByUID(uid string) (int, models.Order) {
+	var key int
+	var order models.Order
+	var orderjson []byte
+
+	args := pgx.NamedArgs{"id": uid}
+	err := db.Conn.QueryRow(context.Background(), q_select_by_uid, args).Scan(&key, &orderjson)
+	if err != nil {
+		slog.Error("queryRow failed: " + err.Error())
+	}
+
+	err = json.Unmarshal(orderjson, &order)
+	if err != nil {
+		slog.Error("unmarshalling failed: " + err.Error())
+	}
+
+	slog.Info("order successfully selected from database")
 	return key, order
 }

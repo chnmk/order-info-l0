@@ -4,30 +4,45 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/jackc/pgx/v5"
 )
 
-// Добавляет данные в таблицу jsonorders.
-var q_insert_json = `
-	INSERT INTO jsonorders(jsonorder)
-	VALUES (@jsonorder)
+// Строка для добавления данных в таблицу orders.
+const q_insert = `
+	INSERT INTO orders(id, uid, expires, order)
+	VALUES (@id, @uid, @expires, @order)
 	RETURNING id
 `
 
-// Пробует добавить заказ в БД, возвращает ошибку только в случае если заказ с таким id уже существует.
-func (db *PostgresDB) InsertOrder(key int, m []byte, ctx context.Context) error {
-	slog.Info("inserting order to database...")
+// Пробует добавить заказ в БД, выводит ошибку если заказ с таким id уже существует.
+func (db *PostgresDB) InsertOrder(id int, order models.OrderStorage, ctx context.Context) {
+	slog.Info(
+		"inserting order to database...",
+		"id", id,
+	)
 
-	args := pgx.NamedArgs{"jsonorder": m}
-	row := db.Conn.QueryRow(context.Background(), q_insert_json, args)
+	args := pgx.NamedArgs{
+		"id":      id,
+		"uid":     order.UID,
+		"expires": order.Expires,
+		"order":   order.Order,
+	}
+	row := db.Conn.QueryRow(context.TODO(), q_insert, args)
 
 	var order_id int
 	err := row.Scan(&order_id)
 	if err != nil {
-		slog.Error("Failed to insert data: " + err.Error())
-		return nil
+		slog.Error(
+			"failed to insert data",
+			"err", err.Error,
+			"id", id,
+		)
+		return
 	}
 
-	slog.Info("finished inserting order to database")
-	return nil
+	slog.Info(
+		"finished inserting order to database",
+		"id", id,
+	)
 }

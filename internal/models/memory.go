@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type Storage interface {
 	HandleMessage([]byte)
 	AddOrder([]byte)
@@ -11,6 +9,6 @@ type Storage interface {
 
 type OrderStorage struct {
 	UID     string
+	Expires int // Дата удаления заказа в формате epoch.
 	Order   []byte
-	Expires time.Time
 }

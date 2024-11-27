@@ -5,10 +5,10 @@ import (
 )
 
 type Database interface {
-	Close()
 	Ping()
 	CreateTables()
-	GetOrdersIDs() []int
+	RestoreData() []OrderStorage
 	SelectOrderById(int) (int, Order)
-	InsertOrder(int, []byte, context.Context) error
+	SelectOrderByUID(string) (int, Order)
+	InsertOrder(int, OrderStorage, context.Context)
 }

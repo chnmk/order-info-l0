@@ -35,7 +35,7 @@ func Connect() {
 		time.Sleep(1 * time.Second)
 	}
 	if err != nil {
-		slog.Error("Kafka connection failed: " + err.Error())
+		slog.Error("kafka connection failed: " + err.Error())
 		os.Exit(1)
 	}
 
