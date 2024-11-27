@@ -13,7 +13,7 @@ func (m *MemStore) AddOrder(order_uid string, date_created string, value []byte)
 	var order models.OrderStorage
 
 	order.UID = order_uid
-	order.Expires = date_created
+	order.Date_created = date_created
 	order.Order = value
 
 	m.mu.Lock()

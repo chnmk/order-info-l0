@@ -6,19 +6,58 @@ import (
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
-func (m *MemStore) Read(id int) models.Order {
-	slog.Info("reading from memory storage...")
+// Получает заказ со всеми дополнительными данными по его ID. В теории более эффективно, чем ReadByUID.
+func (m *MemStore) ReadByID(id int) (order models.OrderStorage) {
+	slog.Info(
+		"reading from memory storage...",
+		"id", id,
+	)
 
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	order, ok := m.orders[id]
-	if ok {
-		slog.Error("Failed to read order from memory: id doesn't exist")
-		return order
+	if id > len(m.orders)-1 {
+		slog.Error(
+			"order not found",
+			"id", id,
+		)
+		return
 	}
 
-	slog.Info("finished reading from memory storage")
+	order = m.orders[id]
 
-	return order
+	slog.Info(
+		"finished reading from memory storage",
+		"id", id,
+	)
+
+	return
+}
+
+// Получает заказ со всеми дополнительными данными по его UID. В теории менее эффективно, чем ReadByID.
+func (m *MemStore) ReadByUID(uid string) (order models.OrderStorage) {
+	slog.Info(
+		"reading from memory storage...",
+		"uid", uid,
+	)
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, o := range m.orders {
+		if o.UID == uid {
+			slog.Info(
+				"finished reading from memory storage",
+				"uid", uid,
+			)
+			return o
+		}
+	}
+
+	slog.Error(
+		"order not found",
+		"uid", uid,
+	)
+
+	return
 }
