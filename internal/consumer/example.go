@@ -29,26 +29,19 @@ func publishExampleData() {
 
 	slog.Info("generating fake data...")
 
-	// Запись сообщений работает 1000 секунд. TODO: правильнее отменять через контекст? Через канал?
-	for i := 0; i < 1000; i++ {
-		var m models.Order
-
-		// TODO: вынести в отдельную функцию для тестов.
-		gofakeit.Struct(&m)
-		data, err := json.Marshal(m)
-		if err != nil {
-			slog.Error(err.Error())
-		}
-
-		err = w.WriteMessages(context.Background(),
-			kafka.Message{Value: data},
+	// Запись сообщений работает постоянно. TODO: отменять через контекст? Через канал?
+	for {
+		err := w.WriteMessages(context.Background(),
+			kafka.Message{Value: goFake()},
 		)
 		if err != nil {
 			slog.Error("failed to write messages: " + err.Error())
-		} else {
-			slog.Info("writing successful!")
+			break
 		}
 
+		slog.Info("writing successful!")
+
+		// TODO: удалить это?
 		time.Sleep(time.Second)
 	}
 
@@ -76,4 +69,17 @@ func goFakeInit() {
 			return time, nil
 		},
 	})
+}
+
+// Генерирует один заказ.
+func goFake() []byte {
+	var m models.Order
+
+	gofakeit.Struct(&m)
+	data, err := json.Marshal(m)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+
+	return data
 }
