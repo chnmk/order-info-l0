@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
-	db_jsonb "github.com/chnmk/order-info-l0/internal/database/jsonb"
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -25,7 +24,7 @@ func NewDB(db models.Database, ctx context.Context) models.Database {
 			slog.Error("unable to connect to database: " + err.Error())
 		}
 
-		db = &db_jsonb.PostgresDB{Conn: conn}
+		db = &PostgresDB{Conn: conn}
 
 		db.Ping()
 		db.CreateTables()

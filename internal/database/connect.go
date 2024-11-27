@@ -1,4 +1,4 @@
-package db_jsonb
+package database
 
 import (
 	"context"
