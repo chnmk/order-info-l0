@@ -6,6 +6,7 @@ import (
 
 type Database interface {
 	Ping()
+	Close()
 	CreateTables()
 	RestoreData() []OrderStorage
 	SelectOrderById(int) (int, Order)

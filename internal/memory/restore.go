@@ -2,8 +2,6 @@ package memory
 
 import (
 	"log/slog"
-	"slices"
-	"strconv"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
 )
@@ -15,20 +13,14 @@ func (m *MemStore) RestoreData() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	ids := cfg.DB.GetOrdersIDs()
-	if len(ids) == 0 {
-		slog.Info("no data found in DB, restoring canceled")
-		return
-	}
+	m.orders = cfg.DB.RestoreData()
 
-	// TODO: у нас будут интерфейсы, так что скорее всего че-т поумнее придумаем.
-	for _, id := range ids {
-		key, order := cfg.DB.SelectOrderById(id)
-		slog.Info(strconv.Itoa(key))
-		m.orders[key] = order
-	}
+	for _, order := range m.orders {
+		if order.ID > m.maxId {
+			m.maxId = order.ID
+		}
 
-	m.currentkey = slices.Max(ids) + 1
+	}
 
 	slog.Info("data successfully restored")
 }

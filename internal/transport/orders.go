@@ -41,8 +41,8 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Получает сам заказ из памяти.
-	result := config.Data.Read(conv_id)
-	if result.Order_uid == "" {
+	result := config.Data.ReadByID(conv_id)
+	if result.UID == "" {
 		slog.Info("invalid request: order not found")
 
 		w.WriteHeader(http.StatusBadRequest)

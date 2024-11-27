@@ -2,8 +2,9 @@ package models
 
 type Storage interface {
 	HandleMessage([]byte)
-	AddOrder([]byte)
-	Read(int) Order
+	AddOrder(string, string, []byte) OrderStorage
+	ReadByID(int) OrderStorage
+	ReadByUID(string) OrderStorage
 	RestoreData()
 }
 

@@ -21,3 +21,8 @@ func (db *PostgresDB) Ping() {
 		os.Exit(1)
 	}
 }
+
+// Обёртка для Pool.Close(), чтобы вызывать её из main.go.
+func (db *PostgresDB) Close() {
+	db.Conn.Close()
+}
