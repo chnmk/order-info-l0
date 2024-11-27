@@ -41,19 +41,26 @@ func (e *EnvStorage) InitEnv() {
 func (e *EnvStorage) ReadEnv() {
 	err := godotenv.Load()
 	if err != nil {
-		slog.Info("Warning: .env file not found")
+		slog.Info(".env file not found")
 	}
 
-	slog.Info("Reading environment variables...")
+	slog.Info("reading environment variables...")
 
 	for name, def := range e.Env {
 		value, exists := os.LookupEnv(name)
 		if exists {
-			// TODO: переписать эти ошибки
-			slog.Info(name + ": " + value)
+			slog.Info(
+				"found env variable",
+				"name", name,
+				"value", value,
+			)
 			e.Env[name] = value
 		} else {
-			slog.Info(name + " not found, using default (" + def + ")")
+			slog.Info(
+				"env variable not found, using default",
+				"name", name,
+				"value", def,
+			)
 		}
 	}
 }
