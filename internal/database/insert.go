@@ -16,7 +16,7 @@ const q_insert = `
 `
 
 // Пробует добавить заказ в БД, выводит ошибку если заказ с таким id уже существует.
-func (db *PostgresDB) InsertOrder(order models.OrderStorage, ctx context.Context) {
+func (db *PostgresDB) InsertOrder(order models.OrderStorage) {
 	slog.Info(
 		"inserting order to database...",
 		"id", order.ID,

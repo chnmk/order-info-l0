@@ -1,7 +1,6 @@
 package memory
 
 import (
-	"context"
 	"encoding/json"
 	"log/slog"
 
@@ -35,7 +34,7 @@ func (m *MemStore) HandleMessage(b []byte) {
 
 	orderStruct := m.AddOrder(orderData.Order_uid, orderData.Date_created, b)
 
-	cfg.DB.InsertOrder(orderStruct, context.TODO())
+	cfg.DB.InsertOrder(orderStruct)
 
 	slog.Info("message handling finished")
 }
