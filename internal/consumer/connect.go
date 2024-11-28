@@ -28,7 +28,7 @@ func Connect() {
 		if err != nil {
 			slog.Error(err.Error())
 		} else {
-			slog.Info("connection successful")
+			slog.Info("kafka connection successful")
 			break
 		}
 
@@ -48,7 +48,7 @@ func Connect() {
 	}
 
 	// Создает горутины для записи сгенерированных сообщений.
-	if cfg.Env.Get("KAFKA_WRITE_EXAMPLES") == "1" {
+	if cfg.KafkaWriteExamples {
 		goFakeInit()
 
 		for i := 0; i < cfg.KafkaWriterGoroutines; i++ {

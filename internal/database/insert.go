@@ -10,8 +10,8 @@ import (
 
 // Строка для добавления данных в таблицу orders.
 const q_insert = `
-	INSERT INTO orders(id, uid, created, order)
-	VALUES (@id, @uid, @created, @order)
+	INSERT INTO orders(id, uid, created, orderdata)
+	VALUES (@id, @uid, @created, @orderdata)
 	RETURNING id
 `
 
@@ -23,10 +23,10 @@ func (db *PostgresDB) InsertOrder(order models.OrderStorage) {
 	)
 
 	args := pgx.NamedArgs{
-		"id":      order.ID,
-		"uid":     order.UID,
-		"created": order.Date_created,
-		"order":   order.Order,
+		"id":        order.ID,
+		"uid":       order.UID,
+		"created":   order.Date_created,
+		"orderdata": order.Order,
 	}
 	row := db.Conn.QueryRow(context.TODO(), q_insert, args)
 

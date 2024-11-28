@@ -13,7 +13,5 @@ var (
 
 // Получает глобальные переменные для пакета memory.
 func getMemoryVars() {
-	if Env.Get("MEMORY_RESTORE_DATA") == "1" {
-		RestoreData = true
-	}
+	RestoreData = envToBool("MEMORY_RESTORE_DATA")
 }

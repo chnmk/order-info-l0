@@ -12,7 +12,7 @@ const q_create = `
 	id INTEGER PRIMARY KEY, 
 	uid VARCHAR(32),
 	created VARCHAR(32),
-	order JSONB
+	orderdata JSONB
 	)`
 
 // Создаёт отсутствующие таблицы в базе данных.

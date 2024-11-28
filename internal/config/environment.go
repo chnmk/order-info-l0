@@ -53,7 +53,7 @@ func (e *EnvStorage) ReadEnv() {
 		value, exists := os.LookupEnv(name)
 		if exists {
 			slog.Info(
-				"found env variable",
+				"env variable found",
 				"name", name,
 				"value", value,
 			)
@@ -81,6 +81,19 @@ func envToInt(s string) int {
 	att := Env.Get(s)
 
 	result, err := strconv.Atoi(att)
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+
+	return result
+}
+
+// Конвертирует строковую переменную окружения s из мапы в тип bool.
+func envToBool(s string) bool {
+	att := Env.Get(s)
+
+	result, err := strconv.ParseBool(att)
 	if err != nil {
 		slog.Error(err.Error())
 		os.Exit(1)

@@ -37,7 +37,7 @@ func NewDB(db models.Database, ctx context.Context) models.Database {
 		db.CreateTables()
 	})
 
-	slog.Info("database successfully initialized")
+	slog.Info("database connection pool successfully initialized")
 
 	return db
 

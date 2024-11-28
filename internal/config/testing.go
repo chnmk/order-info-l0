@@ -14,6 +14,7 @@ import (
 var (
 	KafkaWriterAddr       net.Addr
 	KafkaWriterTopic      string
+	KafkaWriteExamples    bool
 	KafkaWriterGoroutines int
 )
 
@@ -21,6 +22,7 @@ var (
 func getTestingVars() {
 	KafkaWriterAddr = kafka.TCP(fmt.Sprintf("%s:%s", Env.Get("KAFKA_PROTOCOL"), Env.Get("KAFKA_PORT")))
 	KafkaWriterTopic = Env.Get("KAFKA_TOPIC")
-	KafkaReaderGoroutines = envToInt("KAFKA_WRITER_GOROUTINES")
+	KafkaWriteExamples = envToBool("KAFKA_WRITE_EXAMPLES")
+	KafkaWriterGoroutines = envToInt("KAFKA_WRITER_GOROUTINES")
 
 }

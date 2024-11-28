@@ -14,8 +14,6 @@ const q_restore = `
 
 // Пытается получить все данные из БД. В случае неудачи завершает работу сервиса.
 func (db *PostgresDB) RestoreData() []models.OrderStorage {
-	slog.Info("restoring data from database...")
-
 	var result []models.OrderStorage
 	rows, err := db.Conn.Query(context.TODO(), q_restore)
 	if err != nil {
