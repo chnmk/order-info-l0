@@ -2,16 +2,20 @@ package config
 
 import (
 	"context"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
 var (
-	Env        models.Config // Глобальный конфиг.
-	once       sync.Once     // Создать конфиг можно только один раз.
-	ExitCtx    context.Context
-	ExitCancel context.CancelFunc
+	Env     models.Config // Глобальный конфиг.
+	once    sync.Once     // Создать конфиг можно только один раз.
+	Exit    context.CancelFunc
+	ExitWg  sync.WaitGroup
+	ExitCtx context.Context
 )
 
 // Имплементация интерфейса models.Config.
@@ -26,7 +30,7 @@ func NewConfig() models.Config {
 		Env = &EnvStorage{}
 		Env.InitEnv()
 
-		ExitCtx, ExitCancel = context.WithCancel(context.Background())
+		ExitCtx, Exit = signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	})
 
 	return Env

@@ -6,15 +6,18 @@ import (
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/models"
+	"github.com/segmentio/kafka-go"
 )
 
 // Обрабатывает сообщение в горутине. TODO: переписать этот комментарий.
-func (m *MemStore) HandleMessage(b []byte) {
+func (m *MemStore) HandleMessage(reader *kafka.Reader, msg kafka.Message) {
+	defer cfg.ExitWg.Done()
+
 	slog.Error("handling message...")
 
 	var orderData models.Order
 
-	err := json.Unmarshal(b, &orderData)
+	err := json.Unmarshal(msg.Value, &orderData)
 	if err != nil {
 		slog.Error(
 			"failed to unmarshal message",
@@ -32,9 +35,14 @@ func (m *MemStore) HandleMessage(b []byte) {
 		return
 	}
 
-	orderStruct := m.AddOrder(orderData.Order_uid, orderData.Date_created, b)
+	orderStruct := m.AddOrder(orderData.Order_uid, orderData.Date_created, msg.Value)
 
 	cfg.DB.InsertOrder(orderStruct)
+
+	// TODO: вынести это отсюда.
+	if err := reader.CommitMessages(cfg.ExitCtx, msg); err != nil {
+		slog.Error(err.Error())
+	}
 
 	slog.Info("message handling finished")
 }

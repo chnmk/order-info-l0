@@ -2,7 +2,7 @@ package consumer
 
 import "testing"
 
-func goFakeValid(t *testing.T) {
+func GoFakeValid(t *testing.T) {
 	var err error
 
 	if err != nil {

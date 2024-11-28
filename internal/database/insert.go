@@ -1,9 +1,9 @@
 package database
 
 import (
-	"context"
 	"log/slog"
 
+	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/jackc/pgx/v5"
 )
@@ -28,7 +28,7 @@ func (db *PostgresDB) InsertOrder(order models.OrderStorage) {
 		"created":   order.Date_created,
 		"orderdata": order.Order,
 	}
-	row := db.Conn.QueryRow(context.TODO(), q_insert, args)
+	row := db.Conn.QueryRow(cfg.ExitCtx, q_insert, args)
 
 	var order_id int
 	err := row.Scan(&order_id)

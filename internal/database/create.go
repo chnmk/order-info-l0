@@ -1,9 +1,10 @@
 package database
 
 import (
-	"context"
 	"log/slog"
 	"os"
+
+	cfg "github.com/chnmk/order-info-l0/internal/config"
 )
 
 // Строка для создания таблицы.
@@ -19,7 +20,7 @@ const q_create = `
 //
 // Не использует индексы из-за потенциально значительно большего количества операций записи чем чтения.
 func (db *PostgresDB) CreateTables() {
-	_, err := db.Conn.Exec(context.TODO(), q_create)
+	_, err := db.Conn.Exec(cfg.ExitCtx, q_create)
 	if err != nil {
 		slog.Error("failed to create tables: " + err.Error())
 		os.Exit(1)

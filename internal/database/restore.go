@@ -1,10 +1,10 @@
 package database
 
 import (
-	"context"
 	"log/slog"
 	"os"
 
+	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
@@ -15,7 +15,7 @@ const q_restore = `
 // Пытается получить все данные из БД. В случае неудачи завершает работу сервиса.
 func (db *PostgresDB) RestoreData() []models.OrderStorage {
 	var result []models.OrderStorage
-	rows, err := db.Conn.Query(context.TODO(), q_restore)
+	rows, err := db.Conn.Query(cfg.ExitCtx, q_restore)
 	if err != nil {
 		slog.Error(
 			"failed to restore data",

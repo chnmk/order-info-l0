@@ -1,7 +1,6 @@
 package consumer
 
 import (
-	"context"
 	"log/slog"
 	"os"
 	"time"
@@ -18,7 +17,7 @@ func Connect() {
 
 	// Пытается подключиться к Kafka.
 	for i := 0; i < cfg.KafkaReconnectAttempts; i++ {
-		conn, err = kafka.DialLeader(context.Background(),
+		conn, err = kafka.DialLeader(cfg.ExitCtx,
 			cfg.KafkaInitNework,
 			cfg.KafkaInitAddress,
 			cfg.KafkaInitTopic,
@@ -44,7 +43,8 @@ func Connect() {
 	// Создает горутины для чтения сообщений.
 	// TODO: посмотреть, увеличится ли скорость чтения от наличия нескольких горутин.
 	for i := 0; i < cfg.KafkaReaderGoroutines; i++ {
-		go newReader().Read(context.TODO())
+		cfg.ExitWg.Add(1)
+		go newReader().Read()
 	}
 
 	// Создает горутины для записи сгенерированных сообщений.
@@ -52,6 +52,7 @@ func Connect() {
 		goFakeInit()
 
 		for i := 0; i < cfg.KafkaWriterGoroutines; i++ {
+			cfg.ExitWg.Add(1)
 			go publishExampleData()
 		}
 

@@ -1,7 +1,6 @@
 package consumer
 
 import (
-	"context"
 	"encoding/json"
 	"log/slog"
 	"math/rand"
@@ -18,6 +17,8 @@ import (
 // Данные не претендуют на реалистичность (не совпадают цены, места и так далее), но это и не рандомные символы.
 // Такой вариант приемлем, поскольку по ТЗ эти данные пока никак не обрабатываются, но отобразить их нужно.
 func publishExampleData() {
+	defer cfg.ExitWg.Done()
+
 	slog.Info("creating new kafka writer...")
 
 	// Возможно эта функция будет одновременно много раз вызываться в горутинах,
@@ -31,25 +32,31 @@ func publishExampleData() {
 
 	// Запись сообщений работает постоянно. TODO: отменять через контекст? Через канал?
 	for {
-		err := w.WriteMessages(context.Background(),
-			kafka.Message{Value: goFake()},
-		)
-		if err != nil {
-			slog.Error("failed to write messages: " + err.Error())
-			break
+		select {
+
+		case <-cfg.ExitCtx.Done():
+			if err := w.Close(); err != nil {
+				slog.Error("failed to close writer: " + err.Error())
+			}
+
+			slog.Info("fake data generation stopped")
+			return
+
+		default:
+			err := w.WriteMessages(cfg.ExitCtx,
+				kafka.Message{Value: goFake()},
+			)
+			if err != nil {
+				slog.Error("failed to write messages: " + err.Error())
+				break
+			}
+
+			slog.Info("writing successful!")
+
+			// TODO: удалить это?
+			time.Sleep(time.Second)
 		}
-
-		slog.Info("writing successful!")
-
-		// TODO: удалить это?
-		time.Sleep(time.Second)
 	}
-
-	if err := w.Close(); err != nil {
-		slog.Error("failed to close writer: " + err.Error())
-	}
-
-	slog.Info("fake data generation stopped")
 }
 
 // Пример кастомной функции для генерации приближенных к реальности данных.

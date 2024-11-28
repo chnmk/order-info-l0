@@ -1,17 +1,13 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/consumer"
 	"github.com/chnmk/order-info-l0/internal/database"
 	"github.com/chnmk/order-info-l0/internal/memory"
-	"github.com/chnmk/order-info-l0/internal/transport"
 )
 
 func init() {
@@ -28,26 +24,32 @@ func init() {
 
 func main() {
 	// Подключается к БД и создаёт отсутствующие таблицы.
-	cfg.DB = database.NewDB(cfg.DB, context.TODO())
+	cfg.DB = database.NewDB(cfg.DB, cfg.ExitCtx)
 	defer cfg.DB.Close()
 
 	// Инициализирует хранилище в памяти и восстанавливает данные из БД.
 	cfg.Data = memory.NewStorage(cfg.Data)
+	defer cfg.Exit()
 
 	// Проверяет подключение к Kafka.
 	consumer.Connect()
 
-	// Запускает сервер.
-	http.HandleFunc("/orders", transport.GetOrder)
-	http.HandleFunc("/", transport.DisplayPage)
+	/*
+		// Запускает сервер.
+		http.HandleFunc("/orders", transport.GetOrder)
+		http.HandleFunc("/", transport.DisplayPage)
 
-	slog.Info(
-		"starting server...",
-		"port", cfg.ServerPort,
-	)
+		slog.Info(
+			"starting server...",
+			"port", cfg.ServerPort,
+		)
 
-	err := http.ListenAndServe(fmt.Sprintf(":%s", cfg.ServerPort), nil)
-	if err != nil {
-		panic(err)
-	}
+		err := http.ListenAndServe(fmt.Sprintf(":%s", cfg.ServerPort), nil)
+		if err != nil {
+			panic(err)
+		}
+	*/
+
+	cfg.ExitWg.Wait()
+	slog.Info("shutting down...")
 }
