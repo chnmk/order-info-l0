@@ -1,11 +1,5 @@
 package models
 
-import (
-	"encoding/json"
-	"log/slog"
-	"os"
-)
-
 type Order struct {
 	Order_uid          string   `json:"order_uid"`
 	Track_number       string   `json:"track_number"`
@@ -58,20 +52,4 @@ type Item struct {
 	Nm_id        int    `json:"nm_id" fake:"{number: 1, 10000000}"`
 	Brand        string `json:"brand" fake:"{word}"`
 	Status       int    `json:"status" fake:"{number: 100, 999}"`
-}
-
-// Читает файл model.json, возвращает его в виде структуры и []byte.
-func ReadModelFile() (Order, []byte) {
-	var E Order
-	content, err := os.ReadFile("internal/models/model.json")
-	if err != nil {
-		slog.Error(err.Error())
-	}
-
-	err = json.Unmarshal(content, &E)
-	if err != nil {
-		slog.Error(err.Error())
-	}
-
-	return E, content
 }
