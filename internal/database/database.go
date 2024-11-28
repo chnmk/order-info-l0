@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log/slog"
+	"os"
 	"sync"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
@@ -10,8 +11,14 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// Не обязательно, но пусть будет.
+// Ожидается, что БД будет создана только один раз.
+// Подстраховка от неожиданного поведения.
 var once sync.Once
+
+// Имплементация интерфейса models.Database.
+type PostgresDB struct {
+	Conn *pgxpool.Pool
+}
 
 // Создаёт подключение к PostgreSQL, пингует, создает таблицы если их нет.
 func NewDB(db models.Database, ctx context.Context) models.Database {
@@ -34,4 +41,18 @@ func NewDB(db models.Database, ctx context.Context) models.Database {
 
 	return db
 
+}
+
+// Проверяет подключение к БД. В случае ошибки завершает работу сервиса.
+func (db *PostgresDB) Ping() {
+	err := db.Conn.Ping(context.TODO())
+	if err != nil {
+		slog.Error("failed to ping database: " + err.Error())
+		os.Exit(1)
+	}
+}
+
+// Обёртка для Pool.Close(), чтобы вызывать её из main.go.
+func (db *PostgresDB) Close() {
+	db.Conn.Close()
 }

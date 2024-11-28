@@ -27,19 +27,24 @@ func init() {
 }
 
 func main() {
-	// Подключается к БД и создаёт таблицы.
+	// Подключается к БД и создаёт отсутствующие таблицы.
 	cfg.DB = database.NewDB(cfg.DB, context.TODO())
 	defer cfg.DB.Close()
 
 	// Инициализирует хранилище в памяти и восстанавливает данные из БД.
 	cfg.Data = memory.NewStorage(cfg.Data)
 
-	// Пытается подключиться к Kafka в соответствии с переменной окружения KAFKA_RECONNECT_ATTEMPTS.
+	// Проверяет подключение к Kafka.
 	consumer.Connect()
 
-	// Запуск сервера.
+	// Запускает сервер.
 	http.HandleFunc("/orders", transport.GetOrder)
 	http.HandleFunc("/", transport.DisplayPage)
+
+	slog.Info(
+		"starting server...",
+		"port", cfg.ServerPort,
+	)
 
 	err := http.ListenAndServe(fmt.Sprintf(":%s", cfg.ServerPort), nil)
 	if err != nil {

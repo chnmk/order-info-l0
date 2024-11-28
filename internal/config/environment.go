@@ -28,11 +28,14 @@ func (e *EnvStorage) InitEnv() {
 	e.Env["KAFKA_READER_GOROUTINES"] = "1"
 	e.Env["KAFKA_WRITE_EXAMPLES"] = "0"
 	e.Env["KAFKA_WRITER_GOROUTINES"] = "1"
+	e.Env["MEMORY_RESTORE_DATA"] = "1"
 	e.Env["SERVER_PORT"] = "3000"
 
 	Env.ReadEnv()
+
 	getConsumerVars()
 	getDatabaseVars()
+	getMemoryVars()
 	getTestingVars()
 	getTransportVars()
 }

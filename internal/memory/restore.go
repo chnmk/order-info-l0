@@ -6,7 +6,7 @@ import (
 	cfg "github.com/chnmk/order-info-l0/internal/config"
 )
 
-// Забирает все данные из БД, устанавливает значение currentkey на максимальное id заказа из БД.
+// Забирает все данные из БД, устанавливает значение maxId на максимальное id заказа из БД.
 func (m *MemStore) RestoreData() {
 	slog.Info("restoring data from DB...")
 
