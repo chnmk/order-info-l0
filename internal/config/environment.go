@@ -23,12 +23,14 @@ func (e *EnvStorage) InitEnv() {
 	e.Env["KAFKA_PORT"] = "9092"
 	e.Env["KAFKA_TOPIC"] = "9092"
 	e.Env["KAFKA_GROUP_ID"] = "go-orders-1"
-	e.Env["KAFKA_MAX_BYTES"] = "100000" // 100kb
+	e.Env["KAFKA_MAX_BYTES"] = "20000" // 20kb
 	e.Env["KAFKA_COMMIT_INVERVAL_SECONDS"] = "1"
 	e.Env["KAFKA_READER_GOROUTINES"] = "1"
 	e.Env["KAFKA_WRITE_EXAMPLES"] = "0"
 	e.Env["KAFKA_WRITER_GOROUTINES"] = "1"
 	e.Env["MEMORY_RESTORE_DATA"] = "1"
+	e.Env["MEMORY_CLEANUP_MINUTES_INTERVAL"] = "1"
+	e.Env["MEMORY_ORDERS_LIMIT"] = "100000" // исходя из максимального размера сообщения 20kb, 100 тысяч сообщений это не более 2 гигабайта памяти.
 	e.Env["SERVER_PORT"] = "3000"
 
 	Env.ReadEnv()
@@ -77,25 +79,35 @@ func (e *EnvStorage) Get(key string) string {
 }
 
 // Конвертирует строковую переменную окружения s из мапы в тип int.
-func envToInt(s string) (int, error) {
+func envToInt(s string) int {
 	att := Env.Get(s)
 
 	result, err := strconv.Atoi(att)
 	if err != nil {
-		return 0, err
+		slog.Error(
+			"invalid environment variable",
+			"name", s,
+			"err", err,
+		)
+		Exit()
 	}
 
-	return result, nil
+	return result
 }
 
 // Конвертирует строковую переменную окружения s из мапы в тип bool.
-func envToBool(s string) (bool, error) {
+func envToBool(s string) bool {
 	att := Env.Get(s)
 
 	result, err := strconv.ParseBool(att)
 	if err != nil {
-		return false, err
+		slog.Error(
+			"invalid environment variable",
+			"name", s,
+			"err", err,
+		)
+		Exit()
 	}
 
-	return result, nil
+	return result
 }

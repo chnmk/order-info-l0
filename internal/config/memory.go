@@ -1,8 +1,6 @@
 package config
 
 import (
-	"log/slog"
-
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
@@ -11,16 +9,15 @@ import (
 */
 
 var (
-	Data        models.Storage // Глобальное хранилище данных.
-	RestoreData bool           // При значении true (по умолчанию) стоит восстанавливатьы данные из БД при запуске.
+	Data            models.Storage // Глобальное хранилище данных.
+	RestoreData     bool           // При значении true (по умолчанию) стоит восстанавливатьы данные из БД при запуске.
+	CleanupInterval int
+	OrdersLimit     int
 )
 
 // Получает глобальные переменные для пакета memory.
 func getMemoryVars() {
-	env, err := envToBool("MEMORY_RESTORE_DATA")
-	if err != nil {
-		slog.Error(err.Error())
-	} else {
-		RestoreData = env
-	}
+	RestoreData = envToBool("MEMORY_RESTORE_DATA")
+	CleanupInterval = envToInt("MEMORY_CLEANUP_MINUTES_INTERVAL")
+	OrdersLimit = envToInt("MEMORY_ORDERS_LIMIT")
 }
