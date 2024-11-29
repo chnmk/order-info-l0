@@ -36,12 +36,7 @@ func (c *KafkaReader) Read() {
 
 			slog.Info("new message fetched")
 
-			// Запускаем обработчик в горутине, чтобы мы не ждали, пока он доработает. TODO: подумать.
-			// Он же его и закоммитит?
-			// По-хорошему надо как-то через каналы это делать...
-
-			// cfg.ExitWg.Add(1)
-			// go cfg.Data.HandleMessage()
+			// Отправляет сообщение в канал для обработки. Поле reader необходимо, чтобы после обработки закоммитить сообщение.
 			cfg.MessagesChan <- models.MessageData{Reader: c.Reader, Message: m}
 		}
 	}

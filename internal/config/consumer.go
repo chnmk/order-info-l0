@@ -40,5 +40,5 @@ func getConsumerVars() {
 		MaxAttempts: envToInt("KAFKA_RECONNECT_ATTEMPTS"),
 	}
 
-	MessagesChan = make(chan models.MessageData, 10) // TODO: заменить 10 на ожидаемое число хендлеров
+	MessagesChan = make(chan models.MessageData, KafkaReaderGoroutines)
 }

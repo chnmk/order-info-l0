@@ -21,8 +21,6 @@ func publishExampleData() {
 
 	slog.Info("creating new kafka writer...")
 
-	// Возможно эта функция будет одновременно много раз вызываться в горутинах,
-	// так что лучше не получать каждый раз переменные окружения по-новой.
 	w := &kafka.Writer{
 		Addr:  cfg.KafkaWriterAddr,
 		Topic: cfg.KafkaWriterTopic,
@@ -30,7 +28,7 @@ func publishExampleData() {
 
 	slog.Info("generating fake data...")
 
-	// Запись сообщений работает постоянно. TODO: отменять через контекст? Через канал?
+	// Запись сообщений работает постоянно.
 	for {
 		select {
 
@@ -52,9 +50,6 @@ func publishExampleData() {
 			}
 
 			slog.Info("writing successful!")
-
-			// TODO: удалить это?
-			time.Sleep(time.Second)
 		}
 	}
 }
