@@ -33,6 +33,7 @@ func (e *EnvStorage) InitEnv() {
 	e.Env["MEMORY_ORDERS_LIMIT"] = "100000" // исходя из максимального размера сообщения 20kb, 100 тысяч сообщений это не более 2 гигабайта памяти.
 	e.Env["MEMORY_HANDLER_GOROUTINES"] = "1"
 	e.Env["SERVER_PORT"] = "3000"
+	e.Env["SERVER_GET_ORDER_BY_ID"] = "1"
 
 	Env.ReadEnv()
 
@@ -40,7 +41,7 @@ func (e *EnvStorage) InitEnv() {
 	getDatabaseVars()
 	getMemoryVars()
 	getTestingVars()
-	getTransportVars()
+	getServerVars()
 }
 
 // Читает переменные окружения и записывает их в мапу.

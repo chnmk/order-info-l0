@@ -1,0 +1,48 @@
+openapi: 3.0.0
+info:
+  title: Пример API
+  description: Заготовка API сервера, возвращающего информацию о заказе по его ID.
+  version: 0.1.9
+
+paths:
+  /:
+    get:
+      summary: Возвращает HTML-страницу с полем ввода ID заказа.
+      responses:
+        "200":
+          description: Возвращает страницу.
+        "500":
+          description: Внутренняя ошибка сервера.
+  /orders:
+    get:
+      summary: Возвращает информацию о заказе в формате JSON или HTML-страницу с информацией.
+      parameters:
+        - name: id
+          in: query
+          description: ID заказа, информацию о котором надо вернуть.
+          required: true
+          schema:
+            type: integer
+        - name: format
+          in: query
+          description: Запрашивает либо HTML-страницу (format=html), либо информацию в формате JSON (любое другое значение).
+          required: false
+          schema:
+            type: string
+            default: json
+      responses:
+        "200":
+          description: JSON с информацией о заказе.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+        "400":
+          description: Неправильный запрос, например, указан несуществующий заказ.
+        "405":
+          description: Неправильный метод запроса.
+        "500":
+          description: Внутренняя ошибка сервера.

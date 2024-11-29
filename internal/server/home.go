@@ -18,6 +18,9 @@ func DisplayPage(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		slog.Info(err.Error())
+
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("failed to parse html template"))
 		return
 	}
 

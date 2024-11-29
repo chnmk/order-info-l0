@@ -8,11 +8,15 @@ import (
 	"text/template"
 
 	"github.com/chnmk/order-info-l0/internal/config"
+	"github.com/chnmk/order-info-l0/internal/models"
 )
 
+// Заказ можно получить либо по id (порядковый номер заказа), либо по order_uid.
+// По умолчанию в переменных окружения указано получать его по id (SERVER_GET_ORDER_BY_ID = 1).
 func GetOrder(w http.ResponseWriter, r *http.Request) {
 	slog.Info("incoming request to: /orders")
 
+	// Проверяет метод запроса.
 	if r.Method != http.MethodGet {
 		slog.Info("invalid request method")
 
@@ -21,7 +25,7 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Получает id заказа (1, 2, 3..., т.е. порядковый id из кэша, а не order_uid).
+	// Получает параметр id.
 	id := r.URL.Query().Get("id")
 	if id == "" {
 		slog.Info("invalid request: no id")
@@ -31,61 +35,84 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conv_id, err := strconv.Atoi(id)
-	if err != nil {
-		slog.Info("invalid request: id should be a number")
+	var order models.OrderStorage
 
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("invalid request: id should be a number"))
-		return
+	// Если в окружении указано получать заказ по id...
+	if config.GetOrderById {
+		// Cначала стоит проверить, что он является числом.
+		conv_id, err := strconv.Atoi(id)
+		if err != nil {
+			slog.Info("invalid request: id should be a number")
+
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("invalid request: id should be a number"))
+			return
+		}
+
+		// Получает сам заказ из памяти.
+		order = config.Data.ReadByID(conv_id)
+		if order.UID == "" {
+			slog.Info("invalid request: order not found")
+
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("invalid request: order not found"))
+			return
+		}
+
+	} else {
+		// Если в окружении указано получать заказ по order_uid...
+		order = config.Data.ReadByUID(id)
+		if order.UID == "" {
+			slog.Info("invalid request: order not found")
+
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("invalid request: order not found"))
+			return
+		}
 	}
 
-	// Получает сам заказ из памяти.
-	result := config.Data.ReadByID(conv_id)
-	if result.UID == "" {
-		slog.Info("invalid request: order not found")
-
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("invalid request: order not found"))
-		return
-	}
-
-	// Получает параметр format.
-	// При format == "html" возвращает страницу с данными.
+	// Получает параметр format. При format == "html" возвращает страницу с данными.
 	// При любом другом значении возвращает JSON.
 	format := r.URL.Query().Get("format")
 
 	if format == "html" {
-		// Возвращаем страницу.
 		slog.Info("executing template...")
 
+		// Обрабатывает файл с шаблоном.
 		tmpl, err := template.ParseFiles("templates/index.html")
 		if err != nil {
 			slog.Info(err.Error())
+
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("failed to parse html template"))
 			return
 		}
 
-		tmpl.Execute(w, result)
+		// Декодирует данные для отображения на странице.
+		var unmarshalled models.Order
+
+		err = json.Unmarshal(order.Order, &unmarshalled)
+		if err != nil {
+			slog.Info(err.Error())
+
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("failed to parse order data"))
+			return
+		}
+
+		tmpl.Execute(w, unmarshalled)
 
 		slog.Info("template successfully executed")
 
 	} else {
-		// Формат html не указан, возвращаем JSON.
+		// Формат html не указан, возвращает JSON.
 		if format == "" {
 			slog.Info("response format not defined")
 		}
 
 		slog.Info("sending response...")
 
-		resp, err := json.Marshal(result)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("error"))
-			return
-		}
-
-		w.WriteHeader(http.StatusOK)
-		w.Write(resp)
+		w.Write(order.Order)
 	}
 
 	slog.Info("request successfull")
