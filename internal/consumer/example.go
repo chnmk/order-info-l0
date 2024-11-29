@@ -34,7 +34,10 @@ func publishExampleData() {
 
 		case <-cfg.ExitCtx.Done():
 			if err := w.Close(); err != nil {
-				slog.Error("failed to close writer: " + err.Error())
+				slog.Error(
+					"failed to close writer",
+					"err", err.Error(),
+				)
 			}
 
 			slog.Info("fake data generation stopped")
@@ -45,7 +48,10 @@ func publishExampleData() {
 				kafka.Message{Value: goFake()},
 			)
 			if err != nil {
-				slog.Error("failed to write messages: " + err.Error())
+				slog.Error(
+					"failed to write messages",
+					"err", err.Error(),
+				)
 				break
 			}
 

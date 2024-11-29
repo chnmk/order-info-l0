@@ -20,7 +20,10 @@ func (c *KafkaReader) Read() {
 
 		case <-cfg.ExitCtx.Done():
 			if err := c.Reader.Close(); err != nil {
-				slog.Error("failed to close reader: " + err.Error())
+				slog.Error(
+					"failed to close reader",
+					"err", err.Error(),
+				)
 			}
 
 			slog.Info("closing consumer connection...")

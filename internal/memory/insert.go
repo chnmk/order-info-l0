@@ -23,7 +23,10 @@ func (m *MemStore) AddOrder(order_uid string, date_created string, value []byte)
 	order.ID = m.maxId
 	m.orders = append(m.orders, order)
 
-	slog.Info("finished adding order to memory storage")
+	slog.Info(
+		"finished adding order to memory storage",
+		"id", order.ID,
+	)
 
 	return order
 }

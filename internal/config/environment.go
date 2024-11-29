@@ -31,6 +31,7 @@ func (e *EnvStorage) InitEnv() {
 	e.Env["MEMORY_RESTORE_DATA"] = "1"
 	e.Env["MEMORY_CLEANUP_MINUTES_INTERVAL"] = "1"
 	e.Env["MEMORY_ORDERS_LIMIT"] = "100000" // исходя из максимального размера сообщения 20kb, 100 тысяч сообщений это не более 2 гигабайта памяти.
+	e.Env["MEMORY_HANDLER_GOROUTINES"] = "1"
 	e.Env["SERVER_PORT"] = "3000"
 
 	Env.ReadEnv()

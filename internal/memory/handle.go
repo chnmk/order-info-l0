@@ -46,7 +46,10 @@ func (m *MemStore) HandleMessage() {
 				slog.Error(err.Error())
 			}
 
-			slog.Info("message handling finished")
+			slog.Info(
+				"message handling finished",
+				"id", orderStruct.ID,
+			)
 
 		case <-cfg.ExitCtx.Done():
 			slog.Info("message handling canceled")

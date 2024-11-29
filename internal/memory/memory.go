@@ -23,9 +23,20 @@ func NewStorage(m models.Storage) models.Storage {
 	once.Do(func() {
 		m = &MemStore{}
 
+		// Восстанавливает данные.
 		if cfg.RestoreData {
 			m.RestoreData()
 		}
+
+		// Создаёт пул обработчиков сообщений.
+		for i := 0; i < cfg.MemoryHandlerGoroutines; i++ {
+			cfg.ExitWg.Add(1)
+			go cfg.Data.HandleMessage()
+		}
+
+		// Создаёт обработчик устаревших сообщений.
+		cfg.ExitWg.Add(1)
+		go cfg.Data.ClearData()
 	})
 
 	return m

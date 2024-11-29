@@ -19,8 +19,7 @@ func (m *MemStore) ClearData() {
 			return
 
 		default:
-			// TODO: добавить переменную env - раз во сколько секунд запускать сборщик.
-			time.Sleep(1 * time.Minute)
+			time.Sleep(time.Duration(cfg.CleanupInterval) * time.Minute)
 
 			slog.Info(
 				"data cleaner started...",
@@ -31,15 +30,14 @@ func (m *MemStore) ClearData() {
 			m.mu.Lock()
 
 			// Если превышен лимит заказов, оставляет только самые новые.
-			// TODO: по переменной окружения
-			if len(m.orders) > 15 {
-				removing := len(m.orders) - 15
+			if len(m.orders) > cfg.OrdersLimit {
+				removing := len(m.orders) - cfg.OrdersLimit
 				m.orders = m.orders[removing-1:]
 			}
 
 			for _, order := range m.orders {
 
-				// TODO: добавить в env число дней
+				// Будем считать устаревшими заказы, сделанные более 14 дней назад.
 				expDate := time.Now().AddDate(0, 0, -14)
 				dateConv, err := time.Parse(time.UnixDate, order.Date_created)
 

@@ -27,7 +27,10 @@ func NewDB(db models.Database, ctx context.Context) models.Database {
 		var err error
 		conn, err := pgxpool.New(ctx, cfg.PgxpoolUrl)
 		if err != nil {
-			slog.Error("unable to connect to database: " + err.Error())
+			slog.Error(
+				"unable to connect to database",
+				"err", err.Error(),
+			)
 		}
 
 		db = &PostgresDB{Conn: conn}
@@ -46,7 +49,10 @@ func NewDB(db models.Database, ctx context.Context) models.Database {
 func (db *PostgresDB) Ping() {
 	err := db.Conn.Ping(cfg.ExitCtx)
 	if err != nil {
-		slog.Error("failed to ping database: " + err.Error())
+		slog.Error(
+			"failed to ping database",
+			"err", err.Error(),
+		)
 		cfg.Exit()
 	}
 }

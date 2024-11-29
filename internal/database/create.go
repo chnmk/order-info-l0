@@ -21,7 +21,10 @@ const q_create = `
 func (db *PostgresDB) CreateTables() {
 	_, err := db.Conn.Exec(cfg.ExitCtx, q_create)
 	if err != nil {
-		slog.Error("failed to create tables: " + err.Error())
+		slog.Error(
+			"failed to create tables",
+			"err", err.Error(),
+		)
 		cfg.Exit()
 	}
 }
