@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"log/slog"
-	"os"
 	"sync"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
@@ -48,7 +47,7 @@ func (db *PostgresDB) Ping() {
 	err := db.Conn.Ping(cfg.ExitCtx)
 	if err != nil {
 		slog.Error("failed to ping database: " + err.Error())
-		os.Exit(1)
+		cfg.Exit()
 	}
 }
 

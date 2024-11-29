@@ -77,27 +77,25 @@ func (e *EnvStorage) Get(key string) string {
 }
 
 // Конвертирует строковую переменную окружения s из мапы в тип int.
-func envToInt(s string) int {
+func envToInt(s string) (int, error) {
 	att := Env.Get(s)
 
 	result, err := strconv.Atoi(att)
 	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
+		return 0, err
 	}
 
-	return result
+	return result, nil
 }
 
 // Конвертирует строковую переменную окружения s из мапы в тип bool.
-func envToBool(s string) bool {
+func envToBool(s string) (bool, error) {
 	att := Env.Get(s)
 
 	result, err := strconv.ParseBool(att)
 	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
+		return false, err
 	}
 
-	return result
+	return result, nil
 }

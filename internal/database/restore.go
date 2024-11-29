@@ -2,7 +2,6 @@ package database
 
 import (
 	"log/slog"
-	"os"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/models"
@@ -21,7 +20,7 @@ func (db *PostgresDB) RestoreData() []models.OrderStorage {
 			"failed to restore data",
 			"err", err,
 		)
-		os.Exit(1)
+		cfg.Exit()
 	}
 
 	defer rows.Close()
@@ -34,7 +33,7 @@ func (db *PostgresDB) RestoreData() []models.OrderStorage {
 				"failed to restore data",
 				"err", err,
 			)
-			os.Exit(1)
+			cfg.Exit()
 		}
 		result = append(result, order)
 	}
@@ -44,7 +43,7 @@ func (db *PostgresDB) RestoreData() []models.OrderStorage {
 			"failed to restore data",
 			"err", err,
 		)
-		os.Exit(1)
+		cfg.Exit()
 	}
 
 	return result

@@ -2,7 +2,6 @@ package consumer
 
 import (
 	"log/slog"
-	"os"
 	"time"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
@@ -37,7 +36,7 @@ func Connect() {
 	}
 	if err != nil {
 		slog.Error("kafka connection failed: " + err.Error())
-		os.Exit(1)
+		cfg.Exit()
 	}
 
 	conn.Close()

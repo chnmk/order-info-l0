@@ -2,7 +2,6 @@ package database
 
 import (
 	"log/slog"
-	"os"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
 )
@@ -23,6 +22,6 @@ func (db *PostgresDB) CreateTables() {
 	_, err := db.Conn.Exec(cfg.ExitCtx, q_create)
 	if err != nil {
 		slog.Error("failed to create tables: " + err.Error())
-		os.Exit(1)
+		cfg.Exit()
 	}
 }

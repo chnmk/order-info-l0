@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -26,13 +27,43 @@ func getConsumerVars() {
 	KafkaInitAddress = fmt.Sprintf("%s:%s", Env.Get("KAFKA_PROTOCOL"), Env.Get("KAFKA_PORT"))
 	KafkaInitTopic = Env.Get("KAFKA_TOPIC")
 	KafkaInitPartition = 0
-	KafkaReconnectAttempts = envToInt("KAFKA_RECONNECT_ATTEMPTS")
-	KafkaReaderGoroutines = envToInt("KAFKA_READER_GOROUTINES")
+
+	env, err := envToInt("KAFKA_RECONNECT_ATTEMPTS")
+	if err != nil {
+		slog.Error(err.Error())
+	} else {
+		KafkaReconnectAttempts = env
+	}
+
+	env, err = envToInt("KAFKA_READER_GOROUTINES")
+	if err != nil {
+		slog.Error(err.Error())
+	} else {
+		KafkaReaderGoroutines = env
+	}
+
+	var max_bytes int
+	var reconnect_attempts int
+
+	env, err = envToInt("KAFKA_MAX_BYTES")
+	if err != nil {
+		slog.Error(err.Error())
+	} else {
+		max_bytes = env
+	}
+
+	env, err = envToInt("KAFKA_RECONNECT_ATTEMPTS")
+	if err != nil {
+		slog.Error(err.Error())
+	} else {
+		reconnect_attempts = env
+	}
+
 	KafkaReaderConfig = kafka.ReaderConfig{
 		Brokers:     []string{fmt.Sprintf("%s:%s", Env.Get("KAFKA_PROTOCOL"), Env.Get("KAFKA_PORT"))},
 		GroupID:     Env.Get("KAFKA_GROUP_ID"),
 		Topic:       Env.Get("KAFKA_TOPIC"),
-		MaxBytes:    envToInt("KAFKA_MAX_BYTES"),
-		MaxAttempts: envToInt("KAFKA_RECONNECT_ATTEMPTS"),
+		MaxBytes:    max_bytes,
+		MaxAttempts: reconnect_attempts,
 	}
 }

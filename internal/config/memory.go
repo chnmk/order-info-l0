@@ -1,6 +1,10 @@
 package config
 
-import "github.com/chnmk/order-info-l0/internal/models"
+import (
+	"log/slog"
+
+	"github.com/chnmk/order-info-l0/internal/models"
+)
 
 /*
 	Устанавливает переменные для пакета memory.
@@ -13,5 +17,10 @@ var (
 
 // Получает глобальные переменные для пакета memory.
 func getMemoryVars() {
-	RestoreData = envToBool("MEMORY_RESTORE_DATA")
+	env, err := envToBool("MEMORY_RESTORE_DATA")
+	if err != nil {
+		slog.Error(err.Error())
+	} else {
+		RestoreData = env
+	}
 }
