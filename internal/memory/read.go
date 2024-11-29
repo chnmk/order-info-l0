@@ -6,8 +6,7 @@ import (
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
-// Получает заказ со всеми дополнительными данными по его ID. Ожидается, что это более эффективно, чем ReadByUID.
-// Исправить функцию. Она будет не более эффективна.
+// Получает заказ со всеми дополнительными данными по его ID.
 func (m *MemStore) ReadByID(id int) (order models.OrderStorage) {
 	slog.Info(
 		"reading from memory storage...",
@@ -17,26 +16,25 @@ func (m *MemStore) ReadByID(id int) (order models.OrderStorage) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	if id > len(m.orders)-1 {
-		slog.Error(
-			"order not found",
-			"id", id,
-		)
-		return
+	for _, o := range m.orders {
+		if o.ID == id {
+			slog.Info(
+				"finished reading from memory storage",
+				"id", id,
+			)
+			return o
+		}
 	}
 
-	// TODO: надо таки по полю ID искать
-	order = m.orders[id]
-
-	slog.Info(
-		"finished reading from memory storage",
+	slog.Error(
+		"order not found",
 		"id", id,
 	)
 
 	return
 }
 
-// Получает заказ со всеми дополнительными данными по его UID. Ожидается, что это менее эффективно, чем ReadByID.
+// Получает заказ со всеми дополнительными данными по его UID.
 func (m *MemStore) ReadByUID(uid string) (order models.OrderStorage) {
 	slog.Info(
 		"reading from memory storage...",
