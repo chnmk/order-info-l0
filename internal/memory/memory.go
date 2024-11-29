@@ -28,16 +28,6 @@ func NewStorage(ctx context.Context, m models.Storage) models.Storage {
 		if cfg.RestoreData {
 			m.RestoreData(ctx)
 		}
-
-		// Создаёт пул обработчиков сообщений.
-		for i := 0; i < cfg.MemoryHandlerGoroutines; i++ {
-			cfg.ExitWg.Add(1)
-			go cfg.Data.HandleMessage(ctx)
-		}
-
-		// Создаёт обработчик устаревших сообщений.
-		cfg.ExitWg.Add(1)
-		go cfg.Data.ClearData(ctx)
 	})
 
 	return m

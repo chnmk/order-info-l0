@@ -33,6 +33,16 @@ func main() {
 	cfg.Data = memory.NewStorage(cfg.ExitCtx, cfg.Data)
 	defer cfg.Exit()
 
+	// Создаёт пул обработчиков сообщений.
+	for i := 0; i < cfg.MemoryHandlerGoroutines; i++ {
+		cfg.ExitWg.Add(1)
+		go cfg.Data.HandleMessage(cfg.ExitCtx)
+	}
+
+	// Создаёт обработчик устаревших сообщений.
+	cfg.ExitWg.Add(1)
+	go cfg.Data.ClearData(cfg.ExitCtx)
+
 	// Проверяет подключение к Kafka, читает сообщения.
 	consumer.Connect(cfg.ExitCtx)
 
