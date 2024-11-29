@@ -33,7 +33,7 @@ func (c *KafkaReader) Read() {
 				break
 			}
 
-			slog.Info("=== new message fetched ===")
+			slog.Info("new message fetched")
 
 			// Запускаем обработчик в горутине, чтобы мы не ждали, пока он доработает. TODO: подумать.
 			// Он же его и закоммитит?

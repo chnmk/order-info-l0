@@ -15,6 +15,8 @@ func Connect() {
 	var conn *kafka.Conn
 	var err error
 
+	slog.Info("connecting to kafka...")
+
 	// Пытается подключиться к Kafka.
 	for i := 0; i < cfg.KafkaReconnectAttempts; i++ {
 		conn, err = kafka.DialLeader(cfg.ExitCtx,
