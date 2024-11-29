@@ -1,10 +1,14 @@
 package models
 
-import "github.com/segmentio/kafka-go"
+import (
+	"context"
+
+	"github.com/segmentio/kafka-go"
+)
 
 type Storage interface {
 	// Обрабатывает сообщение из Kafka.
-	HandleMessage()
+	HandleMessage(context.Context)
 
 	// Добавляет данные о заказе в память и возвращает сам заказ в том виде, в котором он хранится в памяти.
 	AddOrder(order_uid string, date_created string, value []byte) OrderStorage
@@ -12,8 +16,8 @@ type Storage interface {
 	ReadByID(int) OrderStorage
 	ReadByUID(string) OrderStorage
 
-	RestoreData()
-	ClearData()
+	RestoreData(context.Context)
+	ClearData(context.Context)
 }
 
 // Формат хранения данных в памяти.

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"log/slog"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
@@ -18,8 +19,8 @@ const q_create = `
 // Создаёт отсутствующие таблицы в базе данных.
 //
 // Не использует индексы из-за потенциально значительно большего количества операций записи чем чтения.
-func (db *PostgresDB) CreateTables() {
-	_, err := db.Conn.Exec(cfg.ExitCtx, q_create)
+func (db *PostgresDB) CreateTables(ctx context.Context) {
+	_, err := db.Conn.Exec(ctx, q_create)
 	if err != nil {
 		slog.Error(
 			"failed to create tables",

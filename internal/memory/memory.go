@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"sync"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
@@ -19,24 +20,24 @@ type MemStore struct {
 }
 
 // Возвращает новое хранилище. При необходимости восстанавливает данные из БД.
-func NewStorage(m models.Storage) models.Storage {
+func NewStorage(ctx context.Context, m models.Storage) models.Storage {
 	once.Do(func() {
 		m = &MemStore{}
 
 		// Восстанавливает данные.
 		if cfg.RestoreData {
-			m.RestoreData()
+			m.RestoreData(ctx)
 		}
 
 		// Создаёт пул обработчиков сообщений.
 		for i := 0; i < cfg.MemoryHandlerGoroutines; i++ {
 			cfg.ExitWg.Add(1)
-			go cfg.Data.HandleMessage()
+			go cfg.Data.HandleMessage(ctx)
 		}
 
 		// Создаёт обработчик устаревших сообщений.
 		cfg.ExitWg.Add(1)
-		go cfg.Data.ClearData()
+		go cfg.Data.ClearData(ctx)
 	})
 
 	return m

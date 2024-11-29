@@ -26,18 +26,18 @@ func init() {
 
 func main() {
 	// Подключается к БД, создаёт отсутствующие таблицы.
-	cfg.DB = database.NewDB(cfg.DB, cfg.ExitCtx)
+	cfg.DB = database.NewDB(cfg.ExitCtx, cfg.DB)
 	defer cfg.DB.Close()
 
 	// Инициализирует хранилище в памяти, восстанавливает данные из БД.
-	cfg.Data = memory.NewStorage(cfg.Data)
+	cfg.Data = memory.NewStorage(cfg.ExitCtx, cfg.Data)
 	defer cfg.Exit()
 
 	// Проверяет подключение к Kafka, читает сообщения.
-	consumer.Connect()
+	consumer.Connect(cfg.ExitCtx)
 
 	// Запускает сервер.
-	server.StartServer()
+	server.StartServer(cfg.ExitCtx)
 
 	// Ожидает завершения всех процессов.
 	cfg.ExitWg.Wait()

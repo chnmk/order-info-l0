@@ -20,7 +20,7 @@ type PostgresDB struct {
 }
 
 // Создаёт подключение к PostgreSQL, пингует, создает таблицы если их нет.
-func NewDB(db models.Database, ctx context.Context) models.Database {
+func NewDB(ctx context.Context, db models.Database) models.Database {
 	slog.Info("initializing new database connection pool...")
 
 	once.Do(func() {
@@ -35,8 +35,8 @@ func NewDB(db models.Database, ctx context.Context) models.Database {
 
 		db = &PostgresDB{Conn: conn}
 
-		db.Ping()
-		db.CreateTables()
+		db.Ping(ctx)
+		db.CreateTables(ctx)
 	})
 
 	slog.Info("database connection pool successfully initialized")
@@ -46,8 +46,8 @@ func NewDB(db models.Database, ctx context.Context) models.Database {
 }
 
 // Проверяет подключение к БД. В случае ошибки завершает работу сервиса.
-func (db *PostgresDB) Ping() {
-	err := db.Conn.Ping(cfg.ExitCtx)
+func (db *PostgresDB) Ping(ctx context.Context) {
+	err := db.Conn.Ping(ctx)
 	if err != nil {
 		slog.Error(
 			"failed to ping database",

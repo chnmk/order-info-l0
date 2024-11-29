@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 
@@ -9,7 +10,7 @@ import (
 )
 
 // Обрабатывает сообщение в горутине. TODO: переписать этот комментарий.
-func (m *MemStore) HandleMessage() {
+func (m *MemStore) HandleMessage(ctx context.Context) {
 	defer cfg.ExitWg.Done()
 
 	for {
@@ -40,9 +41,9 @@ func (m *MemStore) HandleMessage() {
 
 			orderStruct := m.AddOrder(orderData.Order_uid, orderData.Date_created, msg.Message.Value)
 
-			cfg.DB.InsertOrder(orderStruct)
+			cfg.DB.InsertOrder(ctx, orderStruct)
 
-			if err := msg.Reader.CommitMessages(cfg.ExitCtx, msg.Message); err != nil {
+			if err := msg.Reader.CommitMessages(ctx, msg.Message); err != nil {
 				slog.Error(err.Error())
 			}
 
@@ -51,7 +52,7 @@ func (m *MemStore) HandleMessage() {
 				"id", orderStruct.ID,
 			)
 
-		case <-cfg.ExitCtx.Done():
+		case <-ctx.Done():
 			slog.Info("message handling canceled")
 
 			return

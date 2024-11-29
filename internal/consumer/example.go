@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"math/rand"
@@ -16,7 +17,7 @@ import (
 //
 // Данные не претендуют на реалистичность (не совпадают цены, места и так далее), но это и не рандомные символы.
 // Такой вариант приемлем, поскольку по ТЗ эти данные пока никак не обрабатываются, но отобразить их нужно.
-func publishExampleData() {
+func publishExampleData(ctx context.Context) {
 	defer cfg.ExitWg.Done()
 
 	slog.Info("creating new kafka writer...")
@@ -32,7 +33,7 @@ func publishExampleData() {
 	for {
 		select {
 
-		case <-cfg.ExitCtx.Done():
+		case <-ctx.Done():
 			if err := w.Close(); err != nil {
 				slog.Error(
 					"failed to close writer",
@@ -44,9 +45,7 @@ func publishExampleData() {
 			return
 
 		default:
-			err := w.WriteMessages(cfg.ExitCtx,
-				kafka.Message{Value: goFake()},
-			)
+			err := w.WriteMessages(ctx, kafka.Message{Value: goFake()})
 			if err != nil {
 				slog.Error(
 					"failed to write messages",

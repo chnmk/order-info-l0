@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 var ServWg sync.WaitGroup
 
 // Запускает сервер, обрабатывает завершение его работы.
-func StartServer() {
+func StartServer(ctx context.Context) {
 	http.HandleFunc("/orders", GetOrder)
 	http.HandleFunc("/", DisplayPage)
 
@@ -28,7 +29,7 @@ func StartServer() {
 
 		// Завершает работу сервера.
 		// https://pkg.go.dev/net/http#Server.Shutdown
-		if err := server.Shutdown(cfg.ExitCtx); err != nil {
+		if err := server.Shutdown(ctx); err != nil {
 			slog.Info(
 				"server shutdown",
 				"err", err,

@@ -1,5 +1,7 @@
 package models
 
+import "context"
+
 type Consumer interface {
-	Read() // Читает данные из Kafka.
+	Read(context.Context) // Читает данные из Kafka.
 }

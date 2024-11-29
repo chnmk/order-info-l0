@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"log/slog"
 	"time"
 
@@ -8,13 +9,13 @@ import (
 )
 
 // Один раз в указанный промежуток времени блокирует хранилище и удаляет из него ненужные данные.
-func (m *MemStore) ClearData() {
+func (m *MemStore) ClearData(ctx context.Context) {
 	defer cfg.ExitWg.Done()
 
 	for {
 		select {
 
-		case <-cfg.ExitCtx.Done():
+		case <-ctx.Done():
 			slog.Info("stopping data cleaner...")
 			return
 

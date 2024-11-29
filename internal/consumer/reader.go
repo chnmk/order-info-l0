@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"context"
 	"log/slog"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
@@ -10,7 +11,7 @@ import (
 // Читает сообщения из Kafka.
 //
 // Использован самый базовый функционал, логика обработки сообщений, включая коммиты, находится в пакете memory.
-func (c *KafkaReader) Read() {
+func (c *KafkaReader) Read(ctx context.Context) {
 	defer cfg.ExitWg.Done()
 
 	slog.Info("reading messages from kafka...")
@@ -18,7 +19,7 @@ func (c *KafkaReader) Read() {
 	for {
 		select {
 
-		case <-cfg.ExitCtx.Done():
+		case <-ctx.Done():
 			if err := c.Reader.Close(); err != nil {
 				slog.Error(
 					"failed to close reader",
@@ -31,7 +32,7 @@ func (c *KafkaReader) Read() {
 
 		default:
 			// Чтобы не терять данные отдельно вызывает FetchMessage и, после записи в БД, CommitMessages.
-			m, err := c.Reader.FetchMessage(cfg.ExitCtx)
+			m, err := c.Reader.FetchMessage(ctx)
 			if err != nil {
 				slog.Error(err.Error())
 				break

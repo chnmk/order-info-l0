@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"log/slog"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
@@ -16,14 +17,14 @@ const q_restore = `
 `
 
 // Пытается получить все данные из БД. В случае неудачи завершает работу сервиса.
-func (db *PostgresDB) RestoreData() []models.OrderStorage {
+func (db *PostgresDB) RestoreData(ctx context.Context) []models.OrderStorage {
 	var result []models.OrderStorage
 
 	args := pgx.NamedArgs{
 		"lim": cfg.OrdersLimit,
 	}
 
-	rows, err := db.Conn.Query(cfg.ExitCtx, q_restore, args)
+	rows, err := db.Conn.Query(ctx, q_restore, args)
 	if err != nil {
 		slog.Error(
 			"failed to restore data",

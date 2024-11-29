@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"context"
 	"log/slog"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 
 // Проверяет подключение к Kafka, пытается подключиться указанное количество раз.
 // Затем создает горутины для чтения сообщений и, при необходимости, для записи сгенерированных данных.
-func Connect() {
+func Connect(ctx context.Context) {
 	var conn *kafka.Conn
 	var err error
 
@@ -18,7 +19,7 @@ func Connect() {
 
 	// Пытается подключиться к Kafka.
 	for i := 0; i < cfg.KafkaReconnectAttempts; i++ {
-		conn, err = kafka.DialLeader(cfg.ExitCtx,
+		conn, err = kafka.DialLeader(ctx,
 			cfg.KafkaInitNework,
 			cfg.KafkaInitAddress,
 			cfg.KafkaInitTopic,
@@ -48,7 +49,7 @@ func Connect() {
 	// TODO: посмотреть, увеличится ли скорость чтения от наличия нескольких горутин.
 	for i := 0; i < cfg.KafkaReaderGoroutines; i++ {
 		cfg.ExitWg.Add(1)
-		go newReader().Read()
+		go newReader().Read(ctx)
 	}
 
 	// Создает горутины для записи сгенерированных сообщений.
@@ -57,7 +58,7 @@ func Connect() {
 
 		for i := 0; i < cfg.KafkaWriterGoroutines; i++ {
 			cfg.ExitWg.Add(1)
-			go publishExampleData()
+			go publishExampleData(ctx)
 		}
 
 	}

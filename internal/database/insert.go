@@ -1,9 +1,9 @@
 package database
 
 import (
+	"context"
 	"log/slog"
 
-	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/jackc/pgx/v5"
 )
@@ -16,7 +16,7 @@ const q_insert = `
 `
 
 // Пробует добавить заказ в БД, выводит ошибку если заказ с таким id уже существует.
-func (db *PostgresDB) InsertOrder(order models.OrderStorage) {
+func (db *PostgresDB) InsertOrder(ctx context.Context, order models.OrderStorage) {
 	slog.Info(
 		"inserting order to database...",
 		"id", order.ID,
@@ -28,7 +28,7 @@ func (db *PostgresDB) InsertOrder(order models.OrderStorage) {
 		"created":   order.Date_created,
 		"orderdata": order.Order,
 	}
-	row := db.Conn.QueryRow(cfg.ExitCtx, q_insert, args)
+	row := db.Conn.QueryRow(ctx, q_insert, args)
 
 	var order_id int
 	err := row.Scan(&order_id)
