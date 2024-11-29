@@ -6,6 +6,7 @@ type Storage interface {
 	ReadByID(int) OrderStorage
 	ReadByUID(string) OrderStorage
 	RestoreData()
+	ClearData()
 }
 
 type OrderStorage struct {

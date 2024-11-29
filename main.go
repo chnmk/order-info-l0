@@ -35,8 +35,13 @@ func main() {
 
 	// Создаёт пул обработчиков сообщений.
 	for i := 0; i < 5; i++ {
+		cfg.ExitWg.Add(1)
 		go cfg.Data.HandleMessage()
 	}
+
+	// Создаёт обработчик устаревших сообщений.
+	cfg.ExitWg.Add(1)
+	go cfg.Data.ClearData()
 
 	// Проверяет подключение к Kafka, читает сообщения.
 	consumer.Connect()

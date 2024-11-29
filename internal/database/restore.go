@@ -7,6 +7,7 @@ import (
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
+// TODO: выбирать топ 100к (а лучше из переменной окружения) в обратном порядке по ID, где дата не раньше чем 14 дней назад (тоже по переменной)
 const q_restore = `
 	SELECT * FROM orders
 `

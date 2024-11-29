@@ -7,6 +7,7 @@ import (
 )
 
 // Получает заказ со всеми дополнительными данными по его ID. Ожидается, что это более эффективно, чем ReadByUID.
+// Исправить функцию. Она будет не более эффективна.
 func (m *MemStore) ReadByID(id int) (order models.OrderStorage) {
 	slog.Info(
 		"reading from memory storage...",
@@ -24,6 +25,7 @@ func (m *MemStore) ReadByID(id int) (order models.OrderStorage) {
 		return
 	}
 
+	// TODO: надо таки по полю ID искать
 	order = m.orders[id]
 
 	slog.Info(

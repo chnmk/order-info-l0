@@ -68,7 +68,7 @@ func goFakeInit() {
 		Output:      "string",
 		Generate: func(f *gofakeit.Faker, m *gofakeit.MapParams, info *gofakeit.Info) (any, error) {
 			// Отнимает один месяц от сегодняшнего дня, переводит в формат unix.
-			min := time.Now().AddDate(0, -1, 0).Unix()
+			min := time.Now().AddDate(0, 0, -7).Unix()
 			// Прибавляет к min случайное значение, таким образом получает дату между сегодня и месяц назад.
 			unix := min + rand.Int63n(time.Now().Unix()-min)
 
