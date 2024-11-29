@@ -7,7 +7,7 @@ import (
 	cfg "github.com/chnmk/order-info-l0/internal/config"
 )
 
-// Один раз в указанный промежуток времени блокирует хранилище и оставляет в нём только нужные данные.
+// Один раз в указанный промежуток времени блокирует хранилище и удаляет из него ненужные данные.
 func (m *MemStore) ClearData() {
 	defer cfg.ExitWg.Done()
 
@@ -30,11 +30,11 @@ func (m *MemStore) ClearData() {
 			i := 0
 			m.mu.Lock()
 
-			// Если превышен лимит сообщений, оставляет только самые новые.
+			// Если превышен лимит заказов, оставляет только самые новые.
 			// TODO: по переменной окружения
 			if len(m.orders) > 15 {
 				removing := len(m.orders) - 15
-				m.orders = m.orders[removing:]
+				m.orders = m.orders[removing-1:]
 			}
 
 			for _, order := range m.orders {
@@ -44,7 +44,7 @@ func (m *MemStore) ClearData() {
 				dateConv, err := time.Parse(time.UnixDate, order.Date_created)
 
 				if dateConv.Before(expDate) || err != nil {
-					// TODO: комментарий
+					// Если заказ попадает под условие удаления, нужно сообщить, что заказ будет удалён.
 					if err != nil {
 						slog.Error(
 							"invalid date string for order, deleting...",
@@ -57,11 +57,16 @@ func (m *MemStore) ClearData() {
 						)
 					}
 				} else {
-					// TODO: комментарий
+					// Если заказ не попадает под условие удаления, он записывается назад в тот же массив.
 					m.orders[i] = order
 					i++
 				}
+
 			}
+
+			// Оставляет массив того размера, сколько было записано заказов, не попавших под удаление.
+			m.orders = m.orders[:i]
+
 			m.mu.Unlock()
 
 			slog.Info(
