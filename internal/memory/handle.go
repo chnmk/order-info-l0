@@ -6,43 +6,52 @@ import (
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/models"
-	"github.com/segmentio/kafka-go"
 )
 
 // Обрабатывает сообщение в горутине. TODO: переписать этот комментарий.
-func (m *MemStore) HandleMessage(reader *kafka.Reader, msg kafka.Message) {
+func (m *MemStore) HandleMessage() {
 	defer cfg.ExitWg.Done()
 
-	slog.Error("handling message...")
+	for {
+		select {
+		case msg := <-cfg.MessagesChan:
 
-	var orderData models.Order
+			slog.Info("handling message...")
 
-	err := json.Unmarshal(msg.Value, &orderData)
-	if err != nil {
-		slog.Error(
-			"failed to unmarshal message",
-			"err", err,
-		)
-		return
+			var orderData models.Order
+
+			err := json.Unmarshal(msg.Message.Value, &orderData)
+			if err != nil {
+				slog.Error(
+					"failed to unmarshal message",
+					"err", err,
+				)
+				return
+			}
+
+			err = ValidateMsg(orderData)
+			if err != nil {
+				slog.Error(
+					"failed to validate message",
+					"err", err,
+				)
+				return
+			}
+
+			orderStruct := m.AddOrder(orderData.Order_uid, orderData.Date_created, msg.Message.Value)
+
+			cfg.DB.InsertOrder(orderStruct)
+
+			if err := msg.Reader.CommitMessages(cfg.ExitCtx, msg.Message); err != nil {
+				slog.Error(err.Error())
+			}
+
+			slog.Info("message handling finished")
+
+		case <-cfg.ExitCtx.Done():
+			slog.Info("message handling canceled")
+
+			return
+		}
 	}
-
-	err = ValidateMsg(orderData)
-	if err != nil {
-		slog.Error(
-			"failed to validate message",
-			"err", err,
-		)
-		return
-	}
-
-	orderStruct := m.AddOrder(orderData.Order_uid, orderData.Date_created, msg.Value)
-
-	cfg.DB.InsertOrder(orderStruct)
-
-	// TODO: вынести это отсюда.
-	if err := reader.CommitMessages(cfg.ExitCtx, msg); err != nil {
-		slog.Error(err.Error())
-	}
-
-	slog.Info("message handling finished")
 }

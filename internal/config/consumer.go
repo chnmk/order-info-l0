@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/chnmk/order-info-l0/internal/models"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -19,6 +20,8 @@ var (
 	KafkaReconnectAttempts int
 	KafkaReaderGoroutines  int
 	KafkaReaderConfig      kafka.ReaderConfig
+
+	MessagesChan chan models.MessageData
 )
 
 // Получает глобальные переменные для пакета consumer.
@@ -66,4 +69,6 @@ func getConsumerVars() {
 		MaxBytes:    max_bytes,
 		MaxAttempts: reconnect_attempts,
 	}
+
+	MessagesChan = make(chan models.MessageData, 10) // TODO: заменить 10 на ожидаемое число хендлеров
 }

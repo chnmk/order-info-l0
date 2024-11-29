@@ -1,9 +1,7 @@
 package models
 
-import "github.com/segmentio/kafka-go"
-
 type Storage interface {
-	HandleMessage(*kafka.Reader, kafka.Message)
+	HandleMessage()
 	AddOrder(string, string, []byte) OrderStorage
 	ReadByID(int) OrderStorage
 	ReadByUID(string) OrderStorage

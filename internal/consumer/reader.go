@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	cfg "github.com/chnmk/order-info-l0/internal/config"
+	"github.com/chnmk/order-info-l0/internal/models"
 )
 
 // Читает сообщения из Kafka.
@@ -38,8 +39,10 @@ func (c *KafkaReader) Read() {
 			// Запускаем обработчик в горутине, чтобы мы не ждали, пока он доработает. TODO: подумать.
 			// Он же его и закоммитит?
 			// По-хорошему надо как-то через каналы это делать...
-			cfg.ExitWg.Add(1)
-			go cfg.Data.HandleMessage(c.Reader, m)
+
+			// cfg.ExitWg.Add(1)
+			// go cfg.Data.HandleMessage()
+			cfg.MessagesChan <- models.MessageData{Reader: c.Reader, Message: m}
 		}
 	}
 }
