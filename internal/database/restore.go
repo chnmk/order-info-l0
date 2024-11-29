@@ -28,7 +28,7 @@ func (db *PostgresDB) RestoreData() []models.OrderStorage {
 
 	for rows.Next() {
 		var order models.OrderStorage
-		err = rows.Scan(&order)
+		err = rows.Scan(&order.ID, &order.UID, &order.Date_created, &order.Order)
 		if err != nil {
 			slog.Error(
 				"failed to restore data",
