@@ -21,5 +21,4 @@ func TestGoFakeGenerator(t *testing.T) {
 		t.Fatalf("expected non-empty values in generated order")
 
 	}
-
 }
