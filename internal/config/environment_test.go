@@ -1,59 +1,85 @@
 package config
 
-import "testing"
+import (
+	"os"
+	"testing"
 
-func EnvToIntValid(t *testing.T) {
-	var err error
+	"github.com/chnmk/order-info-l0/internal/models"
+)
 
-	if err != nil {
-		t.Error(err)
+func TestNewConfig(t *testing.T) {
+	cfg1 := NewConfig()
+	if cfg1 == nil {
+		t.Fatalf("created config shouldn't be nil")
+	}
+
+	cfg2 := NewConfig()
+	if cfg2 != cfg1 {
+		t.Fatalf("config should only be created once")
 	}
 }
 
-func EnvToIntNotInt(t *testing.T) {
-	var err error
+func TestEmptyConfig(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("expected panic on empty map access")
+		}
+	}()
 
-	if err != nil {
-		t.Error(err)
+	os.Setenv("SERVER_PORT", "3000")
+
+	var cfg1 models.Config
+
+	example := cfg1.Get("SERVER_PORT")
+	_ = example
+}
+
+func TestReadEnv(t *testing.T) {
+	os.Setenv("SERVER_PORT", "3000")
+
+	cfg1 := NewConfig()
+
+	example := cfg1.Get("SERVER_PORT")
+	if example != "3000" {
+		t.Fatalf("ReadEnv() didn't read new env variable")
+	}
+
+	os.Setenv("SERVER_PORT", "101010101010101")
+	cfg1.ReadEnv()
+
+	example_new := cfg1.Get("SERVER_PORT")
+
+	if example_new == example || example_new != "101010101010101" {
+		t.Fatalf("ReadEnv() didn't read new env variable")
 	}
 }
 
-func GetFromMapValid(t *testing.T) {
-	var err error
+func TestReadDefaultValue(t *testing.T) {
+	cfg1 := NewConfig()
 
-	if err != nil {
-		t.Error(err)
+	example := cfg1.Get("SERVER_PORT")
+	if example != "3000" {
+		t.Fatalf("expected default env value (3000), found %s", example)
 	}
 }
 
-func GetFromMapNoKey(t *testing.T) {
-	var err error
+func TestEnvToInt(t *testing.T) {
+	os.Setenv("SERVER_PORT", "3000")
 
-	if err != nil {
-		t.Error(err)
+	cfg1 := NewConfig()
+	_ = cfg1
+
+	port_int := envToInt("SERVER_PORT")
+	if port_int != 3000 {
+		t.Fatalf("unexpedted envToInt result: expected 3000, found %d", port_int)
 	}
-}
 
-func ReadEnvValid(t *testing.T) {
-	var err error
+	envToInt("KAFKA_PROTOCOL")
 
-	if err != nil {
-		t.Error(err)
+	select {
+	case <-ExitCtx.Done():
+	default:
+		t.Fatalf("expected service shutdown on error")
 	}
-}
 
-func ReadEnvAllAreEmpty(t *testing.T) {
-	var err error
-
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func RadEnvSomeAreEmpty(t *testing.T) {
-	var err error
-
-	if err != nil {
-		t.Error(err)
-	}
 }

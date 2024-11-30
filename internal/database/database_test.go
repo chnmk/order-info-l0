@@ -1,45 +1,23 @@
 package database
 
-import "testing"
+import (
+	"context"
+	"testing"
 
-func ConnectTwice(t *testing.T) {
-	var err error
+	"github.com/brianvoe/gofakeit/v7"
+	"github.com/chnmk/order-info-l0/internal/models"
+)
 
-	if err != nil {
-		t.Error(err)
+func TestDatabaseExample(t *testing.T) {
+	mydb := &models.MockDatabase{}
+
+	var m models.OrderStorage
+	gofakeit.Struct(&m)
+	mydb.InsertOrder(context.Background(), m)
+
+	newOrder := mydb.RestoreData(context.Background())
+
+	if newOrder[0].ID != m.ID || newOrder[0].Order == nil {
+		t.Fatalf("expected to get the same data")
 	}
 }
-
-func AddValid(t *testing.T) {
-	var err error
-
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func AddExisting(t *testing.T) {
-	var err error
-
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func SelectValid(t *testing.T) {
-	var err error
-
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func SelectInvalid(t *testing.T) {
-	var err error
-
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-// Restore?
