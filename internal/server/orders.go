@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/chnmk/order-info-l0/internal/config"
+	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
@@ -38,7 +38,7 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 	var order models.OrderStorage
 
 	// Если в окружении указано получать заказ по id...
-	if config.GetOrderById {
+	if cfg.GetOrderById {
 		// Cначала стоит проверить, что он является числом.
 		conv_id, err := strconv.Atoi(id)
 		if err != nil {
@@ -50,7 +50,7 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Получает сам заказ из памяти.
-		order = config.Data.ReadByID(conv_id)
+		order = cfg.Data.ReadByID(conv_id)
 		if order.UID == "" {
 			slog.Info("invalid request: order not found")
 
@@ -61,7 +61,7 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 
 	} else {
 		// Если в окружении указано получать заказ по order_uid...
-		order = config.Data.ReadByUID(id)
+		order = cfg.Data.ReadByUID(id)
 		if order.UID == "" {
 			slog.Info("invalid request: order not found")
 
@@ -79,7 +79,7 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 		slog.Info("executing template...")
 
 		// Обрабатывает файл с шаблоном.
-		tmpl, err := template.ParseFiles("templates/index.html")
+		tmpl, err := template.ParseFiles(cfg.TemplatePath)
 		if err != nil {
 			slog.Info(err.Error())
 

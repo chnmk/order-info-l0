@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	cfg "github.com/chnmk/order-info-l0/internal/config"
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
@@ -15,7 +16,7 @@ func DisplayPage(w http.ResponseWriter, r *http.Request) {
 	slog.Info("executing template...")
 
 	var data models.Order
-	tmpl, err := template.ParseFiles("templates/index.html")
+	tmpl, err := template.ParseFiles(cfg.TemplatePath)
 	if err != nil {
 		slog.Info(err.Error())
 
