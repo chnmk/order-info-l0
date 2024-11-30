@@ -13,7 +13,7 @@ type Order struct {
 	Delivery_service   string   `json:"delivery_service" fake:"{word}"`
 	Shardkey           string   `json:"shardkey" fake:"{digit}"`
 	Sm_id              int      `json:"sm_id" fake:"{number: 1, 1000}"`
-	Date_created       string   `json:"date_created" fake:"{wbtime}"`
+	Date_created       string   `json:"date_created" fake:"{wbdate}"`
 	Oof_shard          string   `json:"oof_shard" fake:"{digit}"`
 }
 

@@ -2,6 +2,7 @@ package memory
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -20,7 +21,8 @@ func (m *MemStore) ClearData(ctx context.Context) {
 			return
 
 		default:
-			time.Sleep(time.Duration(cfg.CleanupInterval) * time.Minute)
+			// time.Sleep(time.Duration(cfg.CleanupInterval) * time.Minute)
+			time.Sleep(10 * time.Second)
 
 			slog.Info(
 				"data cleaner started...",
@@ -40,10 +42,11 @@ func (m *MemStore) ClearData(ctx context.Context) {
 
 				// Будем считать устаревшими заказы, сделанные более 14 дней назад.
 				expDate := time.Now().AddDate(0, 0, -14)
-				dateConv, err := time.Parse(time.UnixDate, order.Date_created)
+				dateConv, err := time.Parse("2006-01-02T15:04:05Z", order.Date_created)
 
 				if dateConv.Before(expDate) || err != nil {
 					// Если заказ попадает под условие удаления, нужно сообщить, что заказ будет удалён.
+					fmt.Println("ERRRRRRRRRR: " + err.Error())
 					if err != nil {
 						slog.Error(
 							"invalid date string for order, deleting...",

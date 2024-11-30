@@ -9,7 +9,7 @@ import (
 	"github.com/chnmk/order-info-l0/internal/models"
 )
 
-// Обрабатывает сообщение в горутине. TODO: переписать этот комментарий.
+// Обрабатывает сообщение в горутине.
 func (m *MemStore) HandleMessage(ctx context.Context) {
 	defer cfg.ExitWg.Done()
 

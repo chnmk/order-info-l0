@@ -46,7 +46,6 @@ func Connect(ctx context.Context) {
 	conn.Close()
 
 	// Создает горутины для чтения сообщений.
-	// TODO: посмотреть, увеличится ли скорость чтения от наличия нескольких горутин.
 	for i := 0; i < cfg.KafkaReaderGoroutines; i++ {
 		cfg.ExitWg.Add(1)
 		go newReader().Read(ctx)

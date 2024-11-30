@@ -22,7 +22,7 @@ func getDatabaseVars() {
 		Env.Get("POSTGRES_USER"),
 		Env.Get("POSTGRES_PASSWORD"),
 		Env.Get("DB_HOST"),
-		Env.Get("DBS_PORT"),
+		Env.Get("DB_PORT"),
 		Env.Get("POSTGRES_DB"),
 	)
 }
